@@ -88,7 +88,7 @@ public class DataGenerator {
                     hipertites = (hipertites) || 0.2 * rand.nextInt(100) > 15;
                     double cholesteral = rand.nextInt(500) / 100.0;
                     double triglyceride = rand.nextInt(500) / 100.0;
-                    exams.write("INSERT INTO "+KEYSPACE+".exams (SSN,lastname,name,gender,date,cholesterol,triglyceride,hepatitis) VALUES");
+                    exams.write("INSERT INTO "+KEYSPACE+".exams (SSN,lastname,name,date,cholesterol,triglyceride,hepatitis) VALUES");
                     exams.write(String.format("(%d,'%s','%s','%s','%s',%f,%f,%b);\n",ssn,lastName,name,gender,examFormat.format(lastDate.getTime()),cholesteral,triglyceride,hipertites));
                 }
                 exams.write("APPLY BATCH;\n");
@@ -123,7 +123,6 @@ public class DataGenerator {
                 "  ssn int,\n" +
                 "  lastname text,\n" +
                 "  name text,\n" +
-                "  gender text,\n" +
                 "  date timestamp,\n" +
                 "  cholesterol double,\n" +
                 "  triglyceride double,\n" +
