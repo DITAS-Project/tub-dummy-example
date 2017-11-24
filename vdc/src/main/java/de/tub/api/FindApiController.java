@@ -1,10 +1,14 @@
 package de.tub.api;
 
 import de.tub.model.Exams;
+import de.tub.model.Patient;
+import de.tub.services.ExamService;
+import de.tub.services.PatientService;
 import org.joda.time.LocalDate;
 
 import io.swagger.annotations.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,6 +28,18 @@ import javax.validation.Valid;
 @Controller
 public class FindApiController implements FindApi {
 
+    private PatientService patientService;
+    private ExamService examService;
+
+    @Autowired
+    public void setPatientService(PatientService patientService) {
+        this.patientService = patientService;
+    }
+
+    @Autowired
+    public void setExamService(ExamService examService) {
+        this.examService = examService;
+    }
 
 
     public ResponseEntity<Exams> findGet( @Min(0)@ApiParam(value = "minimal age") @RequestParam(value = "minage", required = false) Integer minage,
@@ -33,7 +49,10 @@ public class FindApiController implements FindApi {
         @ApiParam(value = "") @RequestParam(value = "startDate", required = false) LocalDate startDate,
         @ApiParam(value = "") @RequestParam(value = "endDate", required = false) LocalDate endDate) {
         // do some magic!
-        return new ResponseEntity<Exams>(HttpStatus.OK);
+
+        Iterable<Patient> patients = patientService.listAllPatients(minage, maxage, Patient.GenderEnum.fromValue(gender));
+
+        return ResponseEntity.ok(new Exams(examService.listExamsBy(patients,startDate,endDate,type)));
     }
 
 }

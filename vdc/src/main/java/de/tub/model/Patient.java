@@ -56,6 +56,8 @@ public class Patient   {
 
     @JsonCreator
     public static GenderEnum fromValue(String text) {
+      if(text == null) return null;
+
       for (GenderEnum b : GenderEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
           return b;

@@ -212,3 +212,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/osx,java,maven,windows,eclipse,intellij
+patient.sql
+swagger-spring.iml
+swagger-spring.ipr

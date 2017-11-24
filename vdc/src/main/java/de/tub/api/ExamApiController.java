@@ -1,7 +1,10 @@
 package de.tub.api;
 
 import de.tub.model.Exam;
+import de.tub.model.Exams;
+import de.tub.services.ExamService;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,16 +16,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class ExamApiController implements ExamApi {
 
 
-    public ResponseEntity<Exam> examSSNGet(@ApiParam(value = "unique ID of a patient", required = true) @PathVariable("SSN") Long SSN) {
-        // do some magic!
-        return new ResponseEntity<Exam>(HttpStatus.OK);
+    private ExamService examService;
+
+    @Autowired
+    public void setExamService(ExamService examService) {
+        this.examService = examService;
     }
 
-    public ResponseEntity<Exam> examSSNTestGet(@ApiParam(value = "unique ID of a patient", required = true) @PathVariable("SSN") Long SSN,
+    public ResponseEntity<Exams> examSSNGet(@ApiParam(value = "unique ID of a patient", required = true) @PathVariable("SSN") Long SSN) {
+        // do some magic!
+        return ResponseEntity.ok(new Exams(examService.getExamBySSN(SSN)));
+    }
+
+    public ResponseEntity<Exams> examSSNTestGet(@ApiParam(value = "unique ID of a patient", required = true) @PathVariable("SSN") Long SSN,
                                                @ApiParam(value = "name of the test to return", required = true,
                                                          allowableValues = "{values=[cholesterol, triglyceride, hepatitis], enumVars=[{name=CHOLESTEROL, value=\"cholesterol\"}, {name=TRIGLYCERIDE, value=\"triglyceride\"}, {name=HEPATITIS, value=\"hepatitis\"}]}") @PathVariable("test") String test) {
         // do some magic!
-        return new ResponseEntity<Exam>(HttpStatus.OK);
+        return ResponseEntity.ok(new Exams(examService.getExamBy(SSN,test)));
     }
 
 }

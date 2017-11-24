@@ -7,7 +7,10 @@ package de.tub.api;
 
 import de.tub.model.Exam;
 
+import de.tub.model.Exams;
+import de.tub.services.ExamService;
 import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import javax.validation.constraints.*;
 import javax.validation.Valid;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-11-23T10:26:59.971Z")
+
 
 @Api(value = "exam", description = "the exam API")
 public interface ExamApi {
@@ -34,7 +37,7 @@ public interface ExamApi {
     
     @RequestMapping(value = "/exam/{SSN}",
         method = RequestMethod.GET)
-    ResponseEntity<Exam> examSSNGet(@ApiParam(value = "unique ID of a patient",required=true ) @PathVariable("SSN") Long SSN);
+    ResponseEntity<Exams> examSSNGet(@ApiParam(value = "unique ID of a patient",required=true ) @PathVariable("SSN") Long SSN);
 
 
     @ApiOperation(value = "", notes = "returns the last exams for a specific patient and test ", response = Exam.class, tags={  })
@@ -45,6 +48,6 @@ public interface ExamApi {
     
     @RequestMapping(value = "/exam/{SSN}/{test}",
         method = RequestMethod.GET)
-    ResponseEntity<Exam> examSSNTestGet(@ApiParam(value = "unique ID of a patient",required=true ) @PathVariable("SSN") Long SSN,@ApiParam(value = "name of the test to return",required=true, allowableValues="{values=[cholesterol, triglyceride, hepatitis], enumVars=[{name=CHOLESTEROL, value=\"cholesterol\"}, {name=TRIGLYCERIDE, value=\"triglyceride\"}, {name=HEPATITIS, value=\"hepatitis\"}]}" ) @PathVariable("test") String test);
+    ResponseEntity<Exams> examSSNTestGet(@ApiParam(value = "unique ID of a patient",required=true ) @PathVariable("SSN") Long SSN,@ApiParam(value = "name of the test to return",required=true, allowableValues="{values=[cholesterol, triglyceride, hepatitis], enumVars=[{name=CHOLESTEROL, value=\"cholesterol\"}, {name=TRIGLYCERIDE, value=\"triglyceride\"}, {name=HEPATITIS, value=\"hepatitis\"}]}" ) @PathVariable("test") String test);
 
 }

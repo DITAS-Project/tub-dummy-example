@@ -1,5 +1,6 @@
 package de.tub.model;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,11 @@ import javax.validation.constraints.*;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-11-23T10:26:59.971Z")
 
 public class Exams extends ArrayList<Exam>  {
+
+
+  public Exams(Iterable<Exam> exams) {
+     exams.forEach(this::add);
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
