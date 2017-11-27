@@ -1,0 +1,12 @@
+version: '3'
+services:
+  mysql:
+    image: mysql
+    container_name: DITASmysql
+    ports:
+      - 6603:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "0der1@b)Opd0Sis0nobxuS[uhId"
+      MYSQL_DATABASE: "DITAS"
+    volumes:
+      - ./data/patient.sql:/docker-entrypoint-initdb.d/patient.sql
