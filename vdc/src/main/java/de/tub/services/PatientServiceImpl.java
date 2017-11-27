@@ -42,7 +42,7 @@ public class PatientServiceImpl implements PatientService {
                     if (gender != null && gender == p.getGender()) {
                         return true;
                     } else {
-                        return true;
+                        return gender == null;
                     }
                 });
 

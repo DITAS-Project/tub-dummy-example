@@ -1,42 +1,59 @@
 package de.tub.model;
 
 import java.util.Objects;
+
+import com.datastax.driver.mapping.annotations.Column;
+import com.datastax.driver.mapping.annotations.PartitionKey;
+import com.datastax.driver.mapping.annotations.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
+import de.tub.util.JodaTimeCodec;
 import io.swagger.annotations.ApiModelProperty;
 import org.joda.time.DateTime;
+
 import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Exam
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-11-23T10:26:59.971Z")
 
+@Table(name = "exams", keyspace = "osr",
+        caseSensitiveKeyspace = false,
+        caseSensitiveTable = false)
 public class Exam   {
+
+  @PartitionKey(0)
   @JsonProperty("SSN")
-  private Long SSN = null;
+  @Column(name = "ssn")
+  private Integer SSN = null;
 
   @JsonProperty("lastName")
+  @Column(name = "lastname")
   private String lastName = null;
 
   @JsonProperty("name")
+  @Column(name = "name")
   private String name = null;
 
+  @PartitionKey(1)
   @JsonProperty("date")
+  @Column(name = "date", codec = JodaTimeCodec.class)
   private DateTime date = null;
 
   @JsonProperty("cholesterol")
+  @Column(name = "cholesterol")
   private Double cholesterol = null;
 
   @JsonProperty("triglyceride")
+  @Column(name = "triglyceride")
   private Double triglyceride = null;
 
   @JsonProperty("hepatitis")
+  @Column(name = "hepatitis")
   private Boolean hepatitis = null;
 
-  public Exam SSN(Long SSN) {
+  public Exam SSN(Integer SSN) {
     this.SSN = SSN;
     return this;
   }
@@ -46,13 +63,13 @@ public class Exam   {
    * @return SSN
   **/
   @ApiModelProperty(value = "")
-
-
-  public Long getSSN() {
+  @JsonIgnore
+  public Integer getSSN() {
     return SSN;
   }
 
-  public void setSSN(Long SSN) {
+
+  public void setSSN(Integer SSN) {
     this.SSN = SSN;
   }
 

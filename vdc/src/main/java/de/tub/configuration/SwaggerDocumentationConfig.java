@@ -3,6 +3,7 @@ package de.tub.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -13,7 +14,8 @@ import springfox.documentation.spring.web.plugins.Docket;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-11-23T10:26:59.971Z")
 
 @Configuration
-public class SwaggerDocumentationConfig {
+@EnableWebMvc
+public class SwaggerDocumentationConfig{
 
     ApiInfo apiInfo() {
         return new ApiInfoBuilder()
