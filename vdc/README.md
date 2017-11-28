@@ -1,4 +1,5 @@
 #Readme
+
 VDC mock up implementation for OSR use case of the DITAS project
 
 offers a Rest Enabled application that combines two databases (cassandra and mysql)
