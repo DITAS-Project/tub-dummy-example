@@ -19,15 +19,23 @@ services:
       - 9160:9160
     volumes:
       - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
+  elasticsearch:
+    image: elasticsearch
+    ports:
+      - 9200:9200
+  kibana:
+    image: kibana
+    ports:
+      - 5601:5601
+      - 5044:5044
   vdc:
     build:
       context: ./vdc/
-    container_name: DITAS_OSR_VDC
     ports:
       - 8080:8080
-    links: 
+    links:
       - cassandra:cassandra
       - mysql:mysql
-    depends_on: 
+    depends_on:
       - cassandra
       - mysql
