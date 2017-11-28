@@ -9,16 +9,22 @@ import kotlin.system.measureTimeMillis
 val logger = KotlinLogging.logger {}
 
 fun main(args: Array<String>) {
-    val client = VDCClient("localhost", 8080)
+    val host:String = if(args.isNotEmpty() && !args[0].isEmpty()){
+        args[0]
+    } else {
+        "localhost"
+    }
+
+    val client = VDCClient(host, 8080)
 
     logger.info("starting test run on http://{}:{}",client.host,client.port)
 
     val rand:Random = Random()
 
-    var waitTime:Long = 0
+
     while (true){
         performAPITest(rand, client)
-        waitTime = rand.nextInt(20)*1000L
+        val waitTime = rand.nextInt(20)*1000L
         logger.info ("perfroming next round in {}s",waitTime/1000)
         Thread.sleep(waitTime)
     }
