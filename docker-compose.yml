@@ -23,6 +23,8 @@ services:
     image: elasticsearch
     ports:
       - 9200:9200
+    environment: 
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
   kibana:
     image: kibana
     ports:
