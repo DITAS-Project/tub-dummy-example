@@ -31,6 +31,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
@@ -63,10 +64,10 @@ public class Server implements CommandLineRunner {
                 System.exit(-1);
             }
 
+            //cassandra & mysql
+            waitForCassandra(cassandraURI);
             waitForMySQL(databaseURI);
 
-            //lets wait for good measure
-            Thread.sleep(7200);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -88,6 +89,26 @@ public class Server implements CommandLineRunner {
                 .application();
 
         application.run(args);
+    }
+
+    private static void waitForCassandra(String uri) {
+        while (!pingCassandra(uri)){
+            System.out.println("wait for "+uri);
+            try {
+                Thread.sleep(3600);
+            } catch (InterruptedException e) {}
+        }
+        System.out.println(uri+" reachable");
+
+    }
+
+    private static boolean pingCassandra(String cassandraURI) {
+        try(Socket clientSocket = new Socket(cassandraURI, 9042)){
+            return clientSocket.isConnected();
+        } catch (IOException e){
+            return false;
+        }
+
     }
 
     private static boolean waitForMySQL(String uri) {
