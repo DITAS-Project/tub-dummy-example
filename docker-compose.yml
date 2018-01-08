@@ -41,3 +41,15 @@ services:
     depends_on:
       - cassandra
       - mysql
+  
+  request-monitor:
+    build:
+      context: ./request-monitor/
+    ports:
+      - 8000:8000
+    links:
+      - vdc:vdc
+      - elasticsearch:elasticsearch
+    depends_on:
+      - vdc
+      - elasticsearch
