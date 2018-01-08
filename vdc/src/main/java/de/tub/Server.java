@@ -16,7 +16,6 @@
 
 package de.tub;
 
-import com.datastax.driver.core.Cluster;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -25,16 +24,13 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Properties;
 
 @SpringBootApplication
 @EnableSwagger2
@@ -50,38 +46,22 @@ public class Server implements CommandLineRunner {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("wait for databases to settle");
-
-        Properties properties = new Properties();
-        try(InputStream stream = Server.class.getResourceAsStream("/application.properties")){
-            properties.load(stream);
-            String cassandraURI = properties.getProperty("cassandra.uri");
-            String databaseURI = properties.getProperty("spring.datasource.url");
-
-            boolean connection = ping(cassandraURI) && ping(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
-
-            if(!connection){
-                System.exit(-1);
-            }
-
-            //cassandra & mysql
-            waitForCassandra(cassandraURI);
-            waitForMySQL(databaseURI);
-
-        } catch (IOException e){
-            e.printStackTrace();
-        }
 
         SpringApplication application =
                 new SpringApplicationBuilder(Server.class)
                 .initializers(new ApplicationContextInitializer<ConfigurableApplicationContext>() {
                     @Override
                     public void initialize(ConfigurableApplicationContext ctx) {
+
                         String cassandraURI = ctx.getEnvironment().getProperty("cassandra.uri");
                         String databaseURI = ctx.getEnvironment().getProperty("spring.datasource.url");
 
-                        ping(cassandraURI);
-                        ping(databaseURI);
+                        System.out.println("wait for databases to settle");
+                        waitUntilReachable(cassandraURI);
+                        waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
+
+                        waitForCassandra(cassandraURI);
+                        waitForMySQL(databaseURI);
                     }
 
 
@@ -145,7 +125,7 @@ public class Server implements CommandLineRunner {
 
     }
 
-    private static boolean ping(String uri) {
+    private static boolean waitUntilReachable(String uri) {
         try {
             InetAddress addresse = InetAddress.getByName(uri);
             while(!addresse.isReachable(3600)){
