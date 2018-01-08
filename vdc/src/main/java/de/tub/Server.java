@@ -16,6 +16,7 @@
 
 package de.tub;
 
+import com.datastax.driver.core.Cluster;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -28,8 +29,11 @@ import org.springframework.context.annotation.ComponentScan;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.Properties;
 
 @SpringBootApplication
 @EnableSwagger2
@@ -46,7 +50,27 @@ public class Server implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {
         System.out.println("wait for databases to settle");
-        Thread.sleep(7200);
+
+        Properties properties = new Properties();
+        try(InputStream stream = Server.class.getResourceAsStream("/application.properties")){
+            properties.load(stream);
+            String cassandraURI = properties.getProperty("cassandra.uri");
+            String databaseURI = properties.getProperty("spring.datasource.url");
+
+            boolean connection = ping(cassandraURI) && ping(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
+
+            if(!connection){
+                System.exit(-1);
+            }
+
+            waitForMySQL(databaseURI);
+
+            //lets wait for good measure
+            Thread.sleep(7200);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
         SpringApplication application =
                 new SpringApplicationBuilder(Server.class)
                 .initializers(new ApplicationContextInitializer<ConfigurableApplicationContext>() {
@@ -59,21 +83,35 @@ public class Server implements CommandLineRunner {
                         ping(databaseURI);
                     }
 
-                    private void ping(String uri) {
-                        try {
-                            InetAddress addresse = InetAddress.getByName(uri);
-                            while(!addresse.isReachable(3600)){
-                                System.out.println("wait for "+uri);
-                            }
-                            System.out.println(uri+" reachable");
-                        } catch (IOException e) {
-                            System.out.println("failed to wait for "+uri);
-                        }
-                    }
+
                 })
                 .application();
 
         application.run(args);
+    }
+
+    private static boolean waitForMySQL(String uri) {
+
+        while(!pingMySQL(uri)){
+            System.out.println("wait for "+uri.substring(0,uri.lastIndexOf(":")));
+            try {
+                Thread.sleep(3600);
+            } catch (InterruptedException e) {}
+
+        }
+        System.out.println(uri+" reachable");
+        return true;
+
+    }
+
+    private static boolean pingMySQL(String databaseURI) {
+        try {
+            Connection connection = DriverManager.getConnection(databaseURI);
+            connection.close();
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
     }
 
     class ExitException extends RuntimeException implements ExitCodeGenerator {
@@ -84,5 +122,19 @@ public class Server implements CommandLineRunner {
             return 10;
         }
 
+    }
+
+    private static boolean ping(String uri) {
+        try {
+            InetAddress addresse = InetAddress.getByName(uri);
+            while(!addresse.isReachable(3600)){
+                System.out.println("wait for "+uri);
+            }
+            System.out.println(uri+" reachable");
+            return true;
+        } catch (IOException e) {
+            System.out.println("failed to wait for "+uri);
+            return false;
+        }
     }
 }
