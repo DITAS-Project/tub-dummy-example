@@ -69,8 +69,7 @@ RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 ADD run.sh /run.sh
 
 # add a customlog location since nginx image softlinks original location to the docker console
-ADD customlog /var/log/nginx/customlog
-COPY customlog /var/log/nginx/
+RUN mkdir /var/log/nginx/customlog
 
 # get logstash image
 RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz
