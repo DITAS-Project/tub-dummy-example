@@ -1,6 +1,6 @@
 FROM nginx:latest
 
-
+# add custom nginx config
 ADD nginx.conf /etc/nginx/nginx.conf
 
 
@@ -65,18 +65,22 @@ RUN set -ex; \
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
 
-
+# add script to run logstash and nginx
 ADD run.sh /run.sh
 
+#add a customlog location since nginx image softlinks original location to the docker console
 ADD customlog /var/log/nginx/customlog
 COPY customlog /var/log/nginx/
 
+#get logstash image
 RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz
-RUN dir
+
+#unpack logstash to /
 RUN tar -zxf logstash-6.1.1.tar.gz --directory /
 
+#add custom logstash config to directory
 COPY  logstash.conf  /etc/logstash/conf.d/
+
 EXPOSE 8000
 CMD ["sh", "/run.sh"]
 
-#tar. gz als installation versuchen
