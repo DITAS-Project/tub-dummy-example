@@ -56,12 +56,15 @@ public class Server implements CommandLineRunner {
                         String cassandraURI = ctx.getEnvironment().getProperty("cassandra.uri");
                         String databaseURI = ctx.getEnvironment().getProperty("spring.datasource.url");
 
+                        String user = ctx.getEnvironment().getProperty("spring.datasource.username");
+                        String pass = ctx.getEnvironment().getProperty("spring.datasource.password");
+
                         System.out.println("wait for databases to settle");
                         waitUntilReachable(cassandraURI);
                         waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
 
                         waitForCassandra(cassandraURI);
-                        waitForMySQL(databaseURI);
+                        waitForMySQL(databaseURI,user,pass);
                     }
 
 
@@ -91,9 +94,9 @@ public class Server implements CommandLineRunner {
 
     }
 
-    private static boolean waitForMySQL(String uri) {
+    private static boolean waitForMySQL(String uri, String user, String pass) {
 
-        while(!pingMySQL(uri)){
+        while(!pingMySQL(uri,user,pass)){
             System.out.println("wait for "+uri.substring(0,uri.lastIndexOf(":")));
             try {
                 Thread.sleep(3600);
@@ -105,9 +108,9 @@ public class Server implements CommandLineRunner {
 
     }
 
-    private static boolean pingMySQL(String databaseURI) {
+    private static boolean pingMySQL(String databaseURI, String user, String pass) {
         try {
-            Connection connection = DriverManager.getConnection(databaseURI);
+            Connection connection = DriverManager.getConnection(databaseURI,user,pass);
             connection.close();
             return true;
         } catch(Exception e) {
