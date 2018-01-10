@@ -38,6 +38,10 @@ services:
     links:
       - cassandra:cassandra
       - mysql:mysql
+      - elasticsearch:elasticsearch
+    environment:
+    - "elasticURI=elasticsearch:9200"
+    
     depends_on:
       - cassandra
       - mysql
