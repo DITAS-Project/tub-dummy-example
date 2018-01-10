@@ -53,3 +53,5 @@ services:
     depends_on:
       - vdc
       - elasticsearch
+    environment: 
+      - "VDC_NAME=osrvdc"
