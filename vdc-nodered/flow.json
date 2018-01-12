@@ -1,0 +1,136 @@
+[
+    {
+        "id": "5f08c6b7.a687b8",
+        "type": "tab",
+        "label": "Patient Flow"
+    },
+    {
+        "id": "da8af1c3.c61e9",
+        "type": "MySQLdatabase",
+        "z": "",
+        "host": "mysql",
+        "port": "3306",
+        "db": "DITAS",
+        "tz": ""
+    },
+    {
+        "id": "26dde343.177b4c",
+        "type": "CassandraDatabase",
+        "z": "",
+        "hosts": "cassandra",
+        "port": "9042",
+        "keyspace": "osr"
+    },
+    {
+        "id": "70ff866e.6e355",
+        "type": "http in",
+        "z": "5f08c6b7.a687b8",
+        "name": "getPatient",
+        "url": "/patient/:ssn",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 100,
+        "y": 480,
+        "wires": [
+            [
+                "8f2679ff.f37608",
+                "e5d63321.fe35e8"
+            ]
+        ]
+    },
+    {
+        "id": "8f2679ff.f37608",
+        "type": "function",
+        "z": "5f08c6b7.a687b8",
+        "name": "cassandra-query",
+        "func": "msg.topic=\"Select * from exams where ssn=\"+msg.req.params.ssn\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 370,
+        "y": 440,
+        "wires": [
+            [
+                "a75a1781.aeec08"
+            ]
+        ]
+    },
+    {
+        "id": "e5d63321.fe35e8",
+        "type": "function",
+        "z": "5f08c6b7.a687b8",
+        "name": "mysql-query",
+        "func": "msg.topic=\"Select * from patient where ssn =\"+msg.req.params.ssn\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 353,
+        "y": 538,
+        "wires": [
+            [
+                "fe5387ae.716c6"
+            ]
+        ]
+    },
+    {
+        "id": "fe5387ae.716c6",
+        "type": "mysql",
+        "z": "5f08c6b7.a687b8",
+        "mydb": "da8af1c3.c61e9",
+        "name": "",
+        "x": 550,
+        "y": 520,
+        "wires": [
+            [
+                "167c005c.2e0958"
+            ]
+        ]
+    },
+    {
+        "id": "a75a1781.aeec08",
+        "type": "cassandra",
+        "z": "5f08c6b7.a687b8",
+        "mydb": "26dde343.177b4c",
+        "name": "",
+        "x": 550,
+        "y": 460,
+        "wires": [
+            [
+                "167c005c.2e0958"
+            ]
+        ]
+    },
+    {
+        "id": "167c005c.2e0958",
+        "type": "join",
+        "z": "5f08c6b7.a687b8",
+        "name": "",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "2",
+        "x": 738,
+        "y": 488,
+        "wires": [
+            [
+                "23212b6f.48ee4c"
+            ]
+        ]
+    },
+    {
+        "id": "23212b6f.48ee4c",
+        "type": "http response",
+        "z": "5f08c6b7.a687b8",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 958,
+        "y": 482,
+        "wires": []
+    }
+]

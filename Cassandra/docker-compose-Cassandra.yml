@@ -1,0 +1,14 @@
+version: '3'
+services:
+  cassandra:
+    build:
+      context: ./build
+    container_name: DITAScassandra
+    ports:
+      - 7000:7000
+      - 7001:7001
+      - 9042:9042
+      - 9160:9160
+    volumes:
+      - ./data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
+    #command: /bin/bash -c "exec cqlsh 9042 -f /tmp/DITASPatient.sql"
