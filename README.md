@@ -10,6 +10,7 @@ This example represents a snapshot of an already deployed VDC with two attached 
 use ```docker-compose -f docker-compose.java.yml up ``` to start the vdc and its databases.
 
 use ```docker-compose up ``` to start the node-red vdc and its databases.
+
 ### Available Components:
 * VDC /vdc
     * MySQL Database with dummy data

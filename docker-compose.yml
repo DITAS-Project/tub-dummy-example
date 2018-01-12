@@ -28,6 +28,7 @@ services:
   vdc:
     build:
       context: ./vdc-nodered/
+
     links:
       - cassandra:cassandra
       - mysql:mysql
