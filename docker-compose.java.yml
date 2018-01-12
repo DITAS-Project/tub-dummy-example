@@ -27,13 +27,15 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
   vdc:
     build:
-      context: ./vdc-nodered/
+       context: ./vdc-dummy/
+     ports:
+       - 8080:8080
     links:
-      - cassandra:cassandra
+       - cassandra:cassandra
       - mysql:mysql
     depends_on:
-      - cassandra
-      - mysql
+       - cassandra
+       - mysql
   request-monitor:
     build:
       context: ./request-monitor/
