@@ -1,0 +1,10 @@
+/.idea
+/build
+
+.DS_Store
+/dockbeat
+/dockbeat.test
+*.pyc
+
+atlassian-ide-plugin.xml
+dockbeat.iml
