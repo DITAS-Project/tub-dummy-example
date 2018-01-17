@@ -4,7 +4,7 @@
 
 dockbeat:
   # Defines how often a docker stat is sent to the output
-  period: ${PERIOD:5}
+  period: ${PERIOD:1}
 
   # Defines the docker socket path
   # By default, this will get the unix:///var/run/docker.sock
@@ -68,13 +68,13 @@ output:
     # A template is used to set the mapping in Elasticsearch
     # By default template loading is disabled and no template is loaded.
     # These settings can be adjusted to load your own template or overwrite existing ones
-    #template:
+    # template:
 
-      # Template name. By default the template name is dockbeat.
-      #name: "dockbeat"
+    #   # Template name. By default the template name is dockbeat.
+    #   name: "dockbeat"
 
-      # Path to template file
-      #path: "dockbeat.template.json"
+    #   # Path to template file
+    #   path: "/etc/dockbeat/dockbeat.template.json"
 
       # Overwrite existing template
       #overwrite: false

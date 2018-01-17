@@ -11,13 +11,14 @@ RUN go get github.com/Masterminds/glide
 RUN go get github.com/ingensi/dockbeat
 #COPY . $GOPATH/src/github.com/ingensi/dockbeat
 RUN cd $GOPATH/src/github.com/ingensi/dockbeat && make && make
-ADD dockbeat.yml /etc/dockbeat/
 
-RUN mkdir -p /etc/dockbeat/ \
-    && cp $GOPATH/src/github.com/ingensi/dockbeat/dockbeat /usr/local/bin/dockbeat
+RUN mkdir -p /etc/dockbeat/
+ADD dockbeat.yml /etc/dockbeat/
+ADD dockbeat.template.json /etc/dockbeat/
+RUN    cp $GOPATH/src/github.com/ingensi/dockbeat/dockbeat /etc/dockbeat
     #&& cp $GOPATH/src/github.com/ingensi/dockbeat/dockbeat.yml /etc/dockbeat/dockbeat.yml
 
-WORKDIR $GOPATH/src/github.com/ingensi/dockbeat/
+WORKDIR /etc/dockbeat/
 ENTRYPOINT ["./dockbeat"]
 
 CMD ["-c", "dockbeat.yml", "-v", "-e" ]
