@@ -25,11 +25,11 @@ services:
       - 9200:9200
     environment: 
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  kibana:
-    image: kibana
-    ports:
-      - 5601:5601
-      - 5044:5044
+  #kibana:
+   # image: kibana
+    #ports:
+     # - 5601:5601
+      #- 5044:5044
   vdc:
     build:
       context: ./vdc/
@@ -50,8 +50,17 @@ services:
     links:
       - vdc:vdc
       - elasticsearch:elasticsearch
+      
     depends_on:
       - vdc
       - elasticsearch
+      
     environment: 
       - "VDC_NAME=osrvdc"
+  zipkin:
+   image: openzipkin/zipkin
+   ports:
+      - 9411:9411 
+   links:
+      - request-monitor:request-monitor
+
