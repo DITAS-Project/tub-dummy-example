@@ -9,7 +9,6 @@ services:
       MYSQL_DATABASE: "DITAS"
     volumes:
       - ./MySQL/data/patient.sql:/docker-entrypoint-initdb.d/patient.sql
-
   cassandra:
     build:
       context: ./Cassandra/build
@@ -20,7 +19,6 @@ services:
       - 9160:9160
     volumes:
       - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
-
   elasticsearch:
     image: elasticsearch
     ports:
@@ -32,14 +30,15 @@ services:
       context: ./request-monitor/
     depends_on:
       - elasticsearch
+    ports:
+      - 8000:8000
     environment: 
       - "VDC_NAME=osrvdc"
-    network_mode: host
-    extra_hosts:
+    links:
+      - elasticsearch:elasticsearch
+      - zipkin:zipkin
+    extra_hosts: 
       - "vdc:${ip}"
-      - "zipkin:${ip}"
-      - "elasticsearch:${ip}"
-  
   zipkin:
    image: openzipkin/zipkin
    network_mode: host
