@@ -64,5 +64,8 @@ services:
       - 9411:9411 
    links:
       - request-monitor:request-monitor
+      - elasticsearch:elasticsearch
    environment:
       - "COLLECTOR_SAMPLE_RATE=0.1"
+      - "STORAGE_TYPE=elasticsearch"
+      - "ES_HOSTS=http://elasticsearch:9200"
