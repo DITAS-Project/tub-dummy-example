@@ -49,25 +49,20 @@ public class Server implements CommandLineRunner {
 
         SpringApplication application =
                 new SpringApplicationBuilder(Server.class)
-                .initializers(new ApplicationContextInitializer<ConfigurableApplicationContext>() {
-                    @Override
-                    public void initialize(ConfigurableApplicationContext ctx) {
+                .initializers((ApplicationContextInitializer<ConfigurableApplicationContext>) ctx -> {
 
-                        String cassandraURI = ctx.getEnvironment().getProperty("cassandra.uri");
-                        String databaseURI = ctx.getEnvironment().getProperty("spring.datasource.url");
+                    String cassandraURI = ctx.getEnvironment().getProperty("cassandra.uri");
+                    String databaseURI = ctx.getEnvironment().getProperty("spring.datasource.url");
 
-                        String user = ctx.getEnvironment().getProperty("spring.datasource.username");
-                        String pass = ctx.getEnvironment().getProperty("spring.datasource.password");
+                    String user = ctx.getEnvironment().getProperty("spring.datasource.username");
+                    String pass = ctx.getEnvironment().getProperty("spring.datasource.password");
 
-                        System.out.println("wait for databases to settle");
-                        waitUntilReachable(cassandraURI);
-                        waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
+                    System.out.println("wait for databases to settle");
+                    waitUntilReachable(cassandraURI);
+                    waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
 
-                        waitForCassandra(cassandraURI);
-                        waitForMySQL(databaseURI,user,pass);
-                    }
-
-
+                    waitForCassandra(cassandraURI);
+                    waitForMySQL(databaseURI,user,pass);
                 })
                 .application();
 

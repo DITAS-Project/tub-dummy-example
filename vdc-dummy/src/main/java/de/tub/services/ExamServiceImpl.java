@@ -16,25 +16,27 @@
 
 package de.tub.services;
 
-import com.datastax.driver.core.*;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.MappingManager;
 import de.tub.model.Exam;
 import de.tub.model.Patient;
-import de.tub.util.JodaTimeCodec;
-import org.joda.time.DateTime;
+import de.tub.trace.TraceHelper;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
 public class ExamServiceImpl implements ExamService{
+
+    @Autowired
+    TraceHelper helper;
 
     private final MappingManager manager;
     private final Session session;
@@ -67,22 +69,23 @@ public class ExamServiceImpl implements ExamService{
 
     @Override
     public Iterable<Exam> listAllExams() {
-        return manager.mapper(Exam.class).map(session.execute(listAll.bind()));
+        return helper.wrapCall(()-> manager.mapper(Exam.class).map(session.execute(listAll.bind())));
     }
 
     @Override
     public Iterable<Exam> listExamsBy(Iterable<Patient> ssn, LocalDate start, LocalDate end, String type) {
-
-        LinkedList<Integer> ssns = StreamSupport.stream(ssn.spliterator(),false).map(Patient::getSSN).map(Long::intValue).collect(Collectors.toCollection(LinkedList::new));
-        if(start != null && end != null) {
-            return serach(start, end, ssns);
-        } else if(start != null){
-            return openEnd(ssns,start);
-        } else if(end != null){
-            return openBegin(ssns,end);
-        } else {
-            return filterBySSN(ssns);
-        }
+        return helper.wrapCall(()-> {
+            LinkedList<Integer> ssns = StreamSupport.stream(ssn.spliterator(), false).map(Patient::getSSN).map(Long::intValue).collect(Collectors.toCollection(LinkedList::new));
+            if (start != null && end != null) {
+                return serach(start, end, ssns);
+            } else if (start != null) {
+                return openEnd(ssns, start);
+            } else if (end != null) {
+                return openBegin(ssns, end);
+            } else {
+                return filterBySSN(ssns);
+            }
+        });
     }
 
     private Iterable<Exam> filterBySSN(LinkedList<Integer> ssns) {
@@ -103,12 +106,11 @@ public class ExamServiceImpl implements ExamService{
 
     @Override
     public Iterable<Exam> getExamBySSN(Long ssn) {
-       return manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue())));
-
+        return helper.wrapCall(()-> manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue()))));
     }
 
     @Override
     public Iterable<Exam> getExamBy(Long ssn, String type) {
-        return manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue())));
+        return helper.wrapCall(()-> manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue()))));
     }
 }
