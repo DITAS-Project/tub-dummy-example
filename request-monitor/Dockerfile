@@ -1,7 +1,5 @@
 FROM nginx:latest
 
-# add custom nginx config
-ADD nginx.conf /etc/nginx/nginx.conf
 
 
 RUN apt-get update
@@ -64,9 +62,6 @@ RUN set -ex; \
 # see CA_CERTIFICATES_JAVA_VERSION notes above
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-
-# add script to run logstash and nginx
-ADD run.sh /run.sh
 
 # add a customlog location since nginx image softlinks original location to the docker console
 RUN mkdir /var/log/nginx/customlog
@@ -193,6 +188,16 @@ RUN set -x \
   	apt-get purge -y --auto-remove \
   	&& rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
   fi
+
+#delete logstash tar
+RUN rm -rf logstash-6.1.1.tar.gz
+
+# add script to run logstash and nginx
+ADD run.sh /run.sh
+
+# add custom nginx config
+ADD nginx.conf /nginx.conf
+ENV OPENTRACING off 
 
 STOPSIGNAL SIGTERM
 
