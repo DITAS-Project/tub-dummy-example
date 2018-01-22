@@ -23,7 +23,7 @@ services:
        context: ./vdc-dummy/
     links:
        - cassandra:cassandra
-      - mysql:mysql
+       - mysql:mysql
     depends_on:
        - cassandra
        - mysql
@@ -40,3 +40,7 @@ services:
       - elasticsearch
     environment: 
       - "VDC_NAME=osrvdc"
+  zipkin:
+   image: openzipkin/zipkin
+   links:
+      - request-monitor:request-monitor

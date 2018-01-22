@@ -97,7 +97,7 @@ public class Server implements CommandLineRunner {
     private static boolean waitForMySQL(String uri, String user, String pass) {
 
         while(!pingMySQL(uri,user,pass)){
-            System.out.println("wait for "+uri.substring(0,uri.lastIndexOf(":")));
+            System.out.println("wait for "+uri);
             try {
                 Thread.sleep(3600);
             } catch (InterruptedException e) {}
@@ -114,6 +114,7 @@ public class Server implements CommandLineRunner {
             connection.close();
             return true;
         } catch(Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

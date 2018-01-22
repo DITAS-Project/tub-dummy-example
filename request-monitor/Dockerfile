@@ -1,9 +1,5 @@
 FROM nginx:latest
 
-# add custom nginx config
-ADD nginx.conf /etc/nginx/nginx.conf
-
-
 RUN apt-get update
 RUN apt-get install wget -y && apt-get install --no-install-recommends --no-install-suggests -y gnupg1
 RUN apt-get install -y apt-utils
@@ -26,15 +22,13 @@ RUN { \
 		echo; \
 		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
 	} > /usr/local/bin/docker-java-home \
-	&& chmod +x /usr/local/bin/docker-java-home
+	&& chmod +x /usr/local/bin/docker-java-home \
+  # do some fancy footwork to create a JAVA_HOME that's cross-architecture-safe
+  && ln -svT "/usr/lib/jvm/java-8-openjdk-$(dpkg --print-architecture)" /docker-java-home
 
-# do some fancy footwork to create a JAVA_HOME that's cross-architecture-safe
-RUN ln -svT "/usr/lib/jvm/java-8-openjdk-$(dpkg --print-architecture)" /docker-java-home
 ENV JAVA_HOME /docker-java-home/jre
-
 ENV JAVA_VERSION 8u151
 ENV JAVA_DEBIAN_VERSION 8u151-b12-1~deb9u1
-
 # see https://bugs.debian.org/775775
 # and https://github.com/docker-library/java/issues/19#issuecomment-70546872
 ENV CA_CERTIFICATES_JAVA_VERSION 20170531+nmu1
@@ -64,21 +58,9 @@ RUN set -ex; \
 # see CA_CERTIFICATES_JAVA_VERSION notes above
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-
-# add script to run logstash and nginx
-ADD run.sh /run.sh
-
-# add a customlog location since nginx image softlinks original location to the docker console
-RUN mkdir /var/log/nginx/customlog
-
 # get logstash image
-RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz
-
-# unpack logstash to /
-RUN tar -zxf logstash-6.1.1.tar.gz --directory /
-
-# add custom logstash config to directory
-COPY  logstash.conf  /etc/logstash/conf.d/
+RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz \
+    && tar -zxf logstash-6.1.1.tar.gz --directory /
 
 RUN set -x \
 # install nginx-opentracing package dependencies
@@ -197,5 +179,15 @@ RUN set -x \
 STOPSIGNAL SIGTERM
 
 EXPOSE 8000
+
+# add a customlog location since nginx image softlinks original location to the docker console
+RUN mkdir /var/log/nginx/customlog
+# add custom nginx config
+ADD nginx.conf /etc/nginx/nginx.conf
+# add custom logstash config to directory
+COPY  logstash.conf  /etc/logstash/conf.d/
+# add script to run logstash and nginx
+ADD run.sh /run.sh
+
 CMD ["sh", "/run.sh"]
 
