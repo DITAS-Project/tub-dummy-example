@@ -24,6 +24,7 @@ services:
     links:
        - cassandra:cassandra
        - mysql:mysql
+       - zipkin:zipkin
     depends_on:
        - cassandra
        - mysql
@@ -35,14 +36,14 @@ services:
     links:
       - vdc:vdc
       - elasticsearch:elasticsearch
+      - zipkin:zipkin
     depends_on:
       - vdc
       - elasticsearch
+      - zipkin
     environment: 
       - "VDC_NAME=osrvdc"
   zipkin:
     image: openzipkin/zipkin
     ports:
       - 9411:9411
-    links:
-      - request-monitor:request-monitor
