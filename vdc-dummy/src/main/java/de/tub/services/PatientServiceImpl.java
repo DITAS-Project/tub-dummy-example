@@ -43,7 +43,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Iterable<Patient> listAllPatients() {
-        return helper.wrapCall(() -> patientRepository.findAll());
+        return helper.wrapCall(() -> patientRepository.findAll(),"listAllPatients");
     }
 
     @Override
@@ -60,7 +60,7 @@ public class PatientServiceImpl implements PatientService {
                     });
 
             return patientStream::iterator;
-        });
+        },"findAllPatients");
     }
 
     private Predicate<Patient> getAgeFilter(Integer minAge, Integer maxAge) {
@@ -82,6 +82,6 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Patient getPatientBySSN(Long ssn) {
-        return helper.wrapCall(() -> patientRepository.findOne(ssn));
+        return helper.wrapCall(() -> patientRepository.findOne(ssn),"getPatientBySSN");
     }
 }

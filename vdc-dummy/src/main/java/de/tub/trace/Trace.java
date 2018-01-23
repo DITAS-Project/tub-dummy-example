@@ -1,5 +1,7 @@
 package de.tub.trace;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -17,26 +19,27 @@ public class Trace implements Serializable {
     private final String sampled;
     private final String operation;
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
-
+    @JsonInclude
     public String getTraceId() {
         return traceId;
     }
 
+    @JsonInclude
     public String getParentSpanId() {
         return parentSpanId;
     }
 
+    @JsonInclude
     public String getSpanId() {
         return spanId;
     }
 
+    @JsonInclude
     public String getSampled() {
         return sampled;
     }
 
+    @JsonInclude
     public String getOperation() {
         return operation;
     }

@@ -10,12 +10,11 @@ public class TraceHelper {
 
     @Autowired
     Tracer tracer;
-
-    public <R> R wrapCall(Supplier<R> function){
+    public <R> R wrapCall(Supplier<R> function,String operation){
         Trace trace = Trace.extractFromThread();
 
         if(trace != null){
-            trace = trace.ChildOf();
+            trace = trace.ChildOf(operation);
             tracer.push(trace);
         }
 
@@ -26,6 +25,9 @@ public class TraceHelper {
         }
 
         return result;
+    }
+    public <R> R wrapCall(Supplier<R> function){
+       return wrapCall(function,null);
     }
 
 }

@@ -41,6 +41,8 @@ services:
     environment: 
       - "VDC_NAME=osrvdc"
   zipkin:
-   image: openzipkin/zipkin
-   links:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+    links:
       - request-monitor:request-monitor

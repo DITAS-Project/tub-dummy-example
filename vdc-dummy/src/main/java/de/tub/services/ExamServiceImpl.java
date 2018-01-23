@@ -85,7 +85,7 @@ public class ExamServiceImpl implements ExamService{
             } else {
                 return filterBySSN(ssns);
             }
-        });
+        },"listExamsBy");
     }
 
     private Iterable<Exam> filterBySSN(LinkedList<Integer> ssns) {
@@ -106,11 +106,11 @@ public class ExamServiceImpl implements ExamService{
 
     @Override
     public Iterable<Exam> getExamBySSN(Long ssn) {
-        return helper.wrapCall(()-> manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue()))));
+        return helper.wrapCall(()-> manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue()))),"getExamsBySSN");
     }
 
     @Override
     public Iterable<Exam> getExamBy(Long ssn, String type) {
-        return helper.wrapCall(()-> manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue()))));
+        return helper.wrapCall(()-> manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue()))),"getExamBy");
     }
 }
