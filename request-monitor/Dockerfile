@@ -1,15 +1,11 @@
 FROM nginx:latest
 
-RUN apt-get update
-RUN apt-get install wget -y && apt-get install --no-install-recommends --no-install-suggests -y gnupg1
-RUN apt-get install -y apt-utils
-
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		bzip2 \
+RUN apt-get update && apt-get install -y wget apt-utils  && apt-get install --no-install-recommends --no-install-suggests -y \
+    gnupg1\
+    bzip2 \
 		unzip \
-		xz-utils \
-	&& rm -rf /var/lib/apt/lists/*
+		xz-utils
+	 
 
 # Default to UTF-8 file.encoding
 ENV LANG C.UTF-8
@@ -22,13 +18,15 @@ RUN { \
 		echo; \
 		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
 	} > /usr/local/bin/docker-java-home \
-	&& chmod +x /usr/local/bin/docker-java-home \
-  # do some fancy footwork to create a JAVA_HOME that's cross-architecture-safe
-  && ln -svT "/usr/lib/jvm/java-8-openjdk-$(dpkg --print-architecture)" /docker-java-home
+	&& chmod +x /usr/local/bin/docker-java-home
 
+# do some fancy footwork to create a JAVA_HOME that's cross-architecture-safe
+RUN ln -svT "/usr/lib/jvm/java-8-openjdk-$(dpkg --print-architecture)" /docker-java-home
 ENV JAVA_HOME /docker-java-home/jre
+
 ENV JAVA_VERSION 8u151
 ENV JAVA_DEBIAN_VERSION 8u151-b12-1~deb9u1
+
 # see https://bugs.debian.org/775775
 # and https://github.com/docker-library/java/issues/19#issuecomment-70546872
 ENV CA_CERTIFICATES_JAVA_VERSION 20170531+nmu1
@@ -45,7 +43,6 @@ RUN set -ex; \
 		openjdk-8-jre-headless="$JAVA_DEBIAN_VERSION" \
 		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
 	; \
-	rm -rf /var/lib/apt/lists/*; \
 	\
 # verify that "docker-java-home" returns what we expect
 	[ "$(readlink -f "$JAVA_HOME")" = "$(docker-java-home)" ]; \
@@ -56,15 +53,12 @@ RUN set -ex; \
 	update-alternatives --query java | grep -q 'Status: manual'
 
 # see CA_CERTIFICATES_JAVA_VERSION notes above
-RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
+RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure && mkdir /var/log/nginx/customlog && wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz && tar -zxf logstash-6.1.1.tar.gz --directory /
 
-# get logstash image
-RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz \
-    && tar -zxf logstash-6.1.1.tar.gz --directory /
+
 
 RUN set -x \
 # install nginx-opentracing package dependencies
-  && apt-get update \
   && apt-get install --no-install-recommends --no-install-suggests -y \
               libcurl4-openssl-dev \
               libprotobuf-dev \
@@ -174,20 +168,19 @@ RUN set -x \
   && if [ -n "$tempDir" ]; then \
   	apt-get purge -y --auto-remove \
   	&& rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
-  fi
+  fi \
+  && rm -rf logstash-6.1.1.tar.gz && rm -rf /var/lib/apt/lists/* 
+
+# add script to run logstash and nginx
+ADD run.sh /run.sh
+# add custom logstash config to directory
+ADD logstash.conf  /etc/logstash/conf.d/
+# add custom nginx config
+ADD nginx.conf /nginx.conf
+ENV OPENTRACING off 
 
 STOPSIGNAL SIGTERM
 
 EXPOSE 8000
-
-# add a customlog location since nginx image softlinks original location to the docker console
-RUN mkdir /var/log/nginx/customlog
-# add custom nginx config
-ADD nginx.conf /etc/nginx/nginx.conf
-# add custom logstash config to directory
-COPY  logstash.conf  /etc/logstash/conf.d/
-# add script to run logstash and nginx
-ADD run.sh /run.sh
-
 CMD ["sh", "/run.sh"]
 

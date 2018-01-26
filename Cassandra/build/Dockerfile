@@ -1,21 +1,4 @@
 #############
-# GIT needed for MVN
-#############
-FROM alpine as GIT
-WORKDIR /tmp/
-
-RUN apk --update add git openssh && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm /var/cache/apk/*
-
-#VOLUME /git
-
-ENTRYPOINT ["git"]
-RUN git clone https://github.com/thelastpickle/cassandra-zipkin-tracing.git
-
-############# END GIT
-
-#############
 # MVN needed for a Zipkin tracing plugin for Cassandra
 #############
 FROM openjdk:8-jdk as MAVEN
@@ -193,14 +176,11 @@ RUN set -ex; \
 # https://issues.apache.org/jira/browse/CASSANDRA-11661
 	sed -ri 's/^(JVM_PATCH_VERSION)=.*/\1=25/' "$CASSANDRA_CONFIG/cassandra-env.sh"
 
-#RUN mkdir /docker-entrypoint-initdb.d/ && chmod 777 /docker-entrypoint-initdb.d/
-
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-RUN chmod +x /docker-entrypoint.sh && chmod 777 /docker-entrypoint.sh
-
-RUN mkdir -p /var/lib/cassandra "$CASSANDRA_CONFIG" \
+RUN chmod +x /docker-entrypoint.sh && chmod 777 /docker-entrypoint.sh  \
+    && mkdir -p /var/lib/cassandra "$CASSANDRA_CONFIG" \
 	&& chown -R cassandra:cassandra /var/lib/cassandra "$CASSANDRA_CONFIG" \
 	&& chmod 777 /var/lib/cassandra "$CASSANDRA_CONFIG"
 VOLUME /var/lib/cassandra
@@ -217,11 +197,10 @@ COPY --from=MAVEN /tmp/target/*.jar /etc/cassandra/lib/
 # 9160: thrift service
 
 # add ZIPKIN connectivity to JVM-OPTIONS
-
-RUN   echo "-Dcassandra.custom_tracing_class=com.thelastpickle.cassandra.tracing.ZipkinTracing" >> /etc/cassandra/jvm.options
-RUN   echo "-Dcassandra.custom_query_handler_class=org.apache.cassandra.cql3.CustomPayloadMirroringQueryHandler" >> /etc/cassandra/jvm.options
-RUN   echo "-DZipkinTracing.httpCollectorHost=zipkin" >> /etc/cassandra/jvm.options
-RUN   echo "-DZipkinTracing.httpCollectorPort=9411" >> /etc/cassandra/jvm.options
+RUN echo "-Dcassandra.custom_tracing_class=com.thelastpickle.cassandra.tracing.ZipkinTracing" >> /etc/cassandra/jvm.options && \
+    echo "-Dcassandra.custom_query_handler_class=org.apache.cassandra.cql3.CustomPayloadMirroringQueryHandler" >> /etc/cassandra/jvm.options && \
+    echo "-DZipkinTracing.httpCollectorHost=zipkin" >> /etc/cassandra/jvm.options && \
+    echo "-DZipkinTracing.httpCollectorPort=9411" >> /etc/cassandra/jvm.options 
 
 EXPOSE 7000 7001 7199 9042 9160
 CMD ["cassandra", "-f"]
