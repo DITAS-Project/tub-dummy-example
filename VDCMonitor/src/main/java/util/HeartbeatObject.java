@@ -1,16 +1,18 @@
+package util;
+
 public class HeartbeatObject {
-    private static long lastTimestamp;
+    private static long timestamp;
     private long interval;
     private long time;
 
     public HeartbeatObject(){
         this.time =System.currentTimeMillis();
-        if(lastTimestamp == 0){
+        if(timestamp == 0){
             this.interval= 0;
         }else{
-            this.interval = (time - lastTimestamp);
+            this.interval = (time - timestamp);
         }
-        this.lastTimestamp =time;
+        this.timestamp =time;
     }
 
     public long getInterval(){

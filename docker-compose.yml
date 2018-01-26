@@ -39,6 +39,8 @@ services:
       - cassandra:cassandra
       - mysql:mysql
       - elasticsearch:elasticsearch
+    volumes:
+      - ./vdc/mnt:/var/log/mnt
     environment:
     - "elasticURI=elasticsearch:9200"
     
