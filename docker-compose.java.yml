@@ -28,6 +28,8 @@ services:
     depends_on:
        - cassandra
        - mysql
+    ports:
+      - 8484:8484
   request-monitor:
     build:
       context: ./request-monitor/
@@ -47,3 +49,5 @@ services:
     image: openzipkin/zipkin
     ports:
       - 9411:9411
+    environment: 
+      - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
