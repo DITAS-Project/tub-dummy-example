@@ -1,5 +1,6 @@
 version: '3'
 services:
+  
   mysql:
     image: mysql
     environment:
@@ -7,41 +8,51 @@ services:
       MYSQL_DATABASE: "DITAS"
     volumes:
       - ./MySQL/data/patient.sql:/docker-entrypoint-initdb.d/patient.sql
+  
   cassandra:
     build:
       context: ./Cassandra/build
     volumes:
       - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
+  
   elasticsearch:
     image: elasticsearch
     environment: 
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  
   vdc:
     build:
       context: ./vdc-nodered/
     links:
       - cassandra:cassandra
       - mysql:mysql
+      - zipkin:zipkin
     depends_on:
       - cassandra
       - mysql
+      - zipkin
+    ports:
+      - 8080:8080
+  
   request-monitor:
     build:
       context: ./request-monitor/
     links:
       - vdc:vdc
       - elasticsearch:elasticsearch
-      
+      - zipkin:zipkin
     depends_on:
       - vdc
       - elasticsearch
-      
+      - zipkin
+    ports:
+      - 8000:8000
     environment: 
       - "VDC_NAME=osrvdc"
   zipkin:
     image: openzipkin/zipkin
     ports:
       - 9411:9411
-    links:
-      - request-monitor:request-monitor
+    environment: 
+      - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
 
