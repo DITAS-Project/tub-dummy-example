@@ -66,14 +66,6 @@ RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 # add a customlog location since nginx image softlinks original location to the docker console
 RUN mkdir /var/log/nginx/customlog
 
-# get logstash image
-RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz
-
-# unpack logstash to /
-RUN tar -zxf logstash-6.1.1.tar.gz --directory /
-
-# add custom logstash config to directory
-COPY  logstash.conf  /etc/logstash/conf.d/
 
 RUN set -x \
 # install nginx-opentracing package dependencies
@@ -189,8 +181,28 @@ RUN set -x \
   	&& rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
   fi
 
+
+# get logstash image
+#RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz
+
+# unpack logstash to /
+#RUN tar -zxf logstash-6.1.1.tar.gz --directory /
+
+# add custom logstash config to directory
+#COPY  logstash.conf  /etc/logstash/conf.d/
+
+#get curl package
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+
+#get filebeat image
+RUN curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.1.2-amd64.deb 
+RUN dpkg -i filebeat-6.1.2-amd64.deb
+
+#setup custom config file
+ADD filebeat.yml /etc/filebeat/
+
 #delete logstash tar
-RUN rm -rf logstash-6.1.1.tar.gz
+#RUN rm -rf logstash-6.1.1.tar.gz
 
 # add script to run logstash and nginx
 ADD run.sh /run.sh
@@ -198,6 +210,7 @@ ADD run.sh /run.sh
 # add custom nginx config
 ADD nginx.conf /nginx.conf
 ENV OPENTRACING off 
+
 
 STOPSIGNAL SIGTERM
 
