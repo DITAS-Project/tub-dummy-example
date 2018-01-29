@@ -28,6 +28,9 @@ services:
       - cassandra:cassandra
       - mysql:mysql
       - zipkin:zipkin
+      - elasticsearch:elasticsearch
+    environment:
+    - "elasticURI=elasticsearch:9200"
     depends_on:
       - cassandra
       - mysql
