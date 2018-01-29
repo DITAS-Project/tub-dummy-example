@@ -53,7 +53,13 @@ RUN set -ex; \
 	update-alternatives --query java | grep -q 'Status: manual'
 
 # see CA_CERTIFICATES_JAVA_VERSION notes above
-RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure && mkdir /var/log/nginx/customlog && wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz && tar -zxf logstash-6.1.1.tar.gz --directory /
+RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure && mkdir /var/log/nginx/customlog && apt-get update && apt-get install -y --no-install-recommends curl \
+
+#get filebeat image
+&& curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.1.2-amd64.deb \
+&& dpkg -i filebeat-6.1.2-amd64.deb
+ 
+# && wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz && tar -zxf logstash-6.1.1.tar.gz --directory /
 
 
 
@@ -115,17 +121,17 @@ RUN set -x \
   && make && make install \
   && cd "$tempDir" \
 ### Build Jaeger cpp-client
- && git clone https://github.com/jaegertracing/cpp-client.git jaeger-cpp-client \
+# && git clone https://github.com/jaegertracing/cpp-client.git jaeger-cpp-client \
 # && apt-get update \
 # && apt-get --no-install-recommends --no-install-suggests -y install yaml-cpp \
- && cd jaeger-cpp-client \
- && mkdir .build && cd .build \
- && cmake -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_TESTING=OFF \
-          -DJAEGERTRACING_WITH_YAML_CPP=OFF .. \
- && make && make install \
- && export HUNTER_INSTALL_DIR=$(cat _3rdParty/Hunter/install-root-dir) \
- && cd "$tempDir" \
+# && cd jaeger-cpp-client \
+# && mkdir .build && cd .build \
+# && cmake -DCMAKE_BUILD_TYPE=Release \
+#          -DBUILD_TESTING=OFF \
+#          -DJAEGERTRACING_WITH_YAML_CPP=OFF .. \
+# && make && make install \
+# && export HUNTER_INSTALL_DIR=$(cat _3rdParty/Hunter/install-root-dir) \
+# && cd "$tempDir" \
 ### Build gRPC
  && git clone -b v1.4.x https://github.com/grpc/grpc \
  && cd grpc \
@@ -134,12 +140,12 @@ RUN set -x \
  && make && make install \
  && cd "$tempDir" \
 ### Build lightstep-tracer-cpp
- && git clone https://github.com/lightstep/lightstep-tracer-cpp.git \
- && cd lightstep-tracer-cpp \
- && mkdir .build && cd .build \
- && cmake -DBUILD_SHARED_LIBS=1 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF .. \
- && make && make install \
- && cd "$tempDir" \
+# && git clone https://github.com/lightstep/lightstep-tracer-cpp.git \
+# && cd lightstep-tracer-cpp \
+# && mkdir .build && cd .build \
+# && cmake -DBUILD_SHARED_LIBS=1 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF .. \
+# && make && make install \
+# && cd "$tempDir" \
 ### Build nginx-opentracing modules
   && git clone https://github.com/opentracing-contrib/nginx-opentracing.git \
   && NGINX_VERSION=`nginx -v 2>&1` && NGINX_VERSION=${NGINX_VERSION#*nginx/} \
@@ -154,29 +160,33 @@ RUN set -x \
         --with-compat \
         --add-dynamic-module=${tempDir}/nginx-opentracing/opentracing \
         --add-dynamic-module=${tempDir}/nginx-opentracing/zipkin \
-        --add-dynamic-module=${tempDir}/nginx-opentracing/lightstep \
-        --add-dynamic-module=${tempDir}/nginx-opentracing/jaeger \
+ #       --add-dynamic-module=${tempDir}/nginx-opentracing/lightstep \
+  #      --add-dynamic-module=${tempDir}/nginx-opentracing/jaeger \
         --with-cc-opt="-I$HUNTER_INSTALL_DIR/include" \
         --with-ld-opt="-L$HUNTER_INSTALL_DIR/lib" \
   && make modules \
   && cp objs/ngx_http_opentracing_module.so $NGINX_MODULES_PATH/ \
   && cp objs/ngx_http_zipkin_module.so $NGINX_MODULES_PATH/ \
-  && cp objs/ngx_http_lightstep_module.so $NGINX_MODULES_PATH/ \
-  && cp objs/ngx_http_jaeger_module.so $NGINX_MODULES_PATH/ \
+#  && cp objs/ngx_http_lightstep_module.so $NGINX_MODULES_PATH/ \
+#  && cp objs/ngx_http_jaeger_module.so $NGINX_MODULES_PATH/ \
 	# if we have leftovers from building, let's purge them (including extra, unnecessary build deps)
   && rm -rf $HOME/.hunter \
   && if [ -n "$tempDir" ]; then \
   	apt-get purge -y --auto-remove \
   	&& rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
   fi \
-  && rm -rf logstash-6.1.1.tar.gz && rm -rf /var/lib/apt/lists/* 
+#  && rm -rf logstash-6.1.1.tar.gz 
+  && rm -rf /var/lib/apt/lists/* 
 
 # add script to run logstash and nginx
 ADD run.sh /run.sh
 # add custom logstash config to directory
-ADD logstash.conf  /etc/logstash/conf.d/
+#ADD logstash.conf  /etc/logstash/conf.d/
 # add custom nginx config
 ADD nginx.conf /nginx.conf
+#setup custom filebeat config file
+ADD filebeat.yml /etc/filebeat/
+
 ENV OPENTRACING off 
 
 STOPSIGNAL SIGTERM
