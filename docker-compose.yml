@@ -19,7 +19,8 @@ services:
     image: elasticsearch
     environment: 
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  
+    ports:
+      - 9200:9200
   vdc:
     build:
       context: ./vdc-nodered/
@@ -49,7 +50,7 @@ services:
       - 8000:8000
     environment: 
       - "VDC_NAME=osrvdc"
-      - "OPENTRACING= on"
+      - "OPENTRACING=on"
   zipkin:
     image: openzipkin/zipkin
     ports:

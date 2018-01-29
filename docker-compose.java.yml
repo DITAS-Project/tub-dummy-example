@@ -50,6 +50,7 @@ services:
       - zipkin
     environment: 
       - "VDC_NAME=osrvdc"
+      - "OPENTRACING=on"
   zipkin:
     image: openzipkin/zipkin
     ports:
