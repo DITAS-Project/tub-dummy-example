@@ -44,10 +44,8 @@ services:
     build:
       context: ./dockbeat/
     links:
-      - kibana:kibana
       - elasticsearch:elasticsearch
     depends_on:
-      - kibana
       - elasticsearch 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  

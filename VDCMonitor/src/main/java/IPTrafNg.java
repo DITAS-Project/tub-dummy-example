@@ -105,7 +105,7 @@ public class IPTrafNg implements Runnable {
         HttpRequestWithBody request = Unirest.post("http://" + elastic + path + "/iptraf/" +
                 Integer.toHexString(Calendar.getInstance().hashCode()));
         request.body(jString);
-                Integer.toHexString(Calendar.getInstance().hashCode())
+                Integer.toHexString(Calendar.getInstance().hashCode());
         request.header("content-type", "application/json; charset=UTF-8 ");
         try {
             HttpResponse<JsonNode> jResponse = request.asJson();
