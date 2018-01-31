@@ -10,7 +10,7 @@ import org.apache.commons.io.input.TailerListenerAdapter;
 import util.WhitelistObject;
 
 public class TailFile implements Runnable {
-    private static String tail = "/var/log/mnt/whitelist";
+    private static String tail = "/opt/vdc/mnt/whitelist";
     //private static String tailOutSide = "/home/paavo/IdeaProjects/dummy-example/vdc/mnt/whitelist";
     private static ArrayList<WhitelistObject> whitelistObjects;
 
@@ -32,8 +32,10 @@ public class TailFile implements Runnable {
         public MyListener(){
             ArrayList<WhitelistObject>whitelist= IPTrafNgPars.getInstance().getWhitelist();
         }
+
         @Override
         public void handle(String line) {
+            System.out.println("Tail Handling: " + line);
             String [] args = line.split(";");
             WhitelistObject wl = new WhitelistObject(args[0],args[1]);
             whitelistObjects.add(wl);

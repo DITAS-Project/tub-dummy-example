@@ -27,6 +27,7 @@ public class IPTrafNgPars {
      * @throws IOException
      */
     public  ArrayList<PacketObject> readFile(String filePath) throws IOException {
+        System.out.println("Read file");
         File auszug = new File(filePath);
         FileReader g = new FileReader(auszug);
         BufferedReader br = new BufferedReader(g);

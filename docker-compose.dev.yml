@@ -26,23 +26,23 @@ services:
     environment: 
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
   request-monitor:
-    build:
-      context: ./request-monitor/
+   build:
+    context: ./request-monitor/
     depends_on:
-      - elasticsearch
+     - elasticsearch
     ports:
       - 8000:8000
     environment: 
       - "VDC_NAME=osrvdc"
     links:
-      - elasticsearch:elasticsearch
+     - elasticsearch:elasticsearch
       - zipkin:zipkin
     extra_hosts: 
       - "vdc:${ip}"
   zipkin:
     image: openzipkin/zipkin
     ports:
-      - 9411:9411
+     - 9411:9411
     environment: 
       - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
       - "COLLECTOR_SAMPLE_RATE=0.1"
