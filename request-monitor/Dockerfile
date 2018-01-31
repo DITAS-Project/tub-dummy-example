@@ -187,6 +187,8 @@ ADD nginx.conf /nginx.conf
 #setup custom filebeat config file
 ADD filebeat.yml /etc/filebeat/
 
+ADD pipeline.json /
+
 ENV OPENTRACING off 
 
 STOPSIGNAL SIGTERM

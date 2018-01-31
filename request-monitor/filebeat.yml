@@ -149,6 +149,7 @@ output.elasticsearch:
   # Array of hosts to connect to.
   hosts: ["elasticsearch:9200"]
   index: "${VDC_NAME:vdc0}-%{+YYYY.MM.dd}"
+  pipeline: "nginx-pipeline"
 
 setup.template.name: "${VDC_NAME:vdc0}"
 setup.template.pattern: "${VDC_NAME:vdc0}-*"

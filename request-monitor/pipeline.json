@@ -1,0 +1,19 @@
+
+
+
+{
+  "description": "nginx-filebeat pipline",
+  "processors": [
+    {
+      "json": {
+        "field": "message",
+        "target_field": "data"
+      }
+    },
+    {
+      "remove": {
+        "field": "message"
+      }
+    }
+  ]
+}
