@@ -12,6 +12,8 @@ services:
       context: ./Cassandra/build
     volumes:
       - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
+    links:
+      - zipkin:zipkin
   elasticsearch:
     image: elasticsearch
     ports:

@@ -1,3 +1,62 @@
+#############
+# GIT needed for MVN
+#############
+FROM alpine as GIT
+WORKDIR /tmp/
+
+RUN apk --update add git openssh && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm /var/cache/apk/*
+
+#VOLUME /git
+
+ENTRYPOINT ["git"]
+RUN git clone https://github.com/thelastpickle/cassandra-zipkin-tracing.git
+
+############# END GIT
+
+#############
+# MVN needed for a Zipkin tracing plugin for Cassandra
+#############
+FROM openjdk:8-jdk as MAVEN
+
+WORKDIR /tmp/
+
+ARG MAVEN_VERSION=3.5.2
+ARG USER_HOME_DIR="/root"
+ARG SHA=707b1f6e390a65bde4af4cdaf2a24d45fc19a6ded00fff02e91626e3e42ceaff
+ARG BASE_URL=https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries
+
+RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
+  && curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+  && echo "${SHA}  /tmp/apache-maven.tar.gz" | sha256sum -c - \
+  && tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 \
+  && rm -f /tmp/apache-maven.tar.gz \
+  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+
+ENV MAVEN_HOME /usr/share/maven
+ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
+
+COPY mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh
+COPY settings-docker.xml /usr/share/maven/ref/
+
+#ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
+
+# GET Zipkin tracing plugin for Cassandra
+#COPY --from=GIT /tmp/cassandra-zipkin-tracing/* /tmp/
+#RUN ls -all
+#RUN   sed -i "s|127.0.0.1|zipkin|g" /tmp/src/main/java/com/thelastpickle/cassandra/tracing/ZipkinTracing.java
+
+ADD zipkin_cassandra_plugin /tmp
+
+RUN mvn install
+
+############# END MVN
+
+#############
+# Cassandra
+#############
+
 # vim:set ft=dockerfile:
 FROM debian:jessie-backports
 
@@ -94,6 +153,8 @@ RUN set -ex; \
 			;; \
 	esac; \
 	\
+	apt-get install less \
+    ; \
 	apt-get install -y \
 		cassandra="$CASSANDRA_VERSION" \
 		cassandra-tools="$CASSANDRA_VERSION" \
@@ -144,10 +205,28 @@ RUN mkdir -p /var/lib/cassandra "$CASSANDRA_CONFIG" \
 	&& chmod 777 /var/lib/cassandra "$CASSANDRA_CONFIG"
 VOLUME /var/lib/cassandra
 
+# get MAVEN
+COPY --from=MAVEN /tmp/target/*.jar /usr/share/cassandra/lib/
+RUN mkdir -p /etc/cassandra/lib
+COPY --from=MAVEN /tmp/target/*.jar /etc/cassandra/lib/
+
 # 7000: intra-node communication
 # 7001: TLS intra-node communication
 # 7199: JMX
 # 9042: CQL
 # 9160: thrift service
+
+# Configure the Cassandra Tracing level
+
+#RUN sed -i 's/level=\"DEBUG\"/level=\"TRACE\"/g' /etc/cassandra/logback.xml
+#'$i\    <logger name="org.apache.cassandra" level="TRACE"/>' /etc/cassandra/logback.xml
+
+# add ZIPKIN connectivity to JVM-OPTIONS
+
+RUN   echo "-Dcassandra.custom_tracing_class=com.thelastpickle.cassandra.tracing.ZipkinTracing" >> /etc/cassandra/jvm.options
+RUN   echo "-Dcassandra.custom_query_handler_class=org.apache.cassandra.cql3.CustomPayloadMirroringQueryHandler" >> /etc/cassandra/jvm.options
+RUN   echo "-DZipkinTracing.httpCollectorHost=zipkin" >> /etc/cassandra/jvm.options
+RUN   echo "-DZipkinTracing.httpCollectorPort=9411" >> /etc/cassandra/jvm.options
+
 EXPOSE 7000 7001 7199 9042 9160
 CMD ["cassandra", "-f"]
