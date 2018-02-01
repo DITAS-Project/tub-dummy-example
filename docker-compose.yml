@@ -1,6 +1,6 @@
 version: '3'
 services:
-  
+
   mysql:
     image: mysql
     environment:
@@ -8,19 +8,22 @@ services:
       MYSQL_DATABASE: "DITAS"
     volumes:
       - ./MySQL/data/patient.sql:/docker-entrypoint-initdb.d/patient.sql
-  
+
   cassandra:
     build:
       context: ./Cassandra/build
     volumes:
       - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
-  
+    links:
+      - zipkin:zipkin
+
   elasticsearch:
     image: elasticsearch
-    environment: 
+    environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - 9200:9200
+
   vdc:
     build:
       context: ./vdc-nodered/
@@ -39,16 +42,16 @@ services:
       - zipkin
     ports:
       - 8080:8080
-  
+
   dockbeat:
     build:
       context: ./dockbeat/
     links:
       - elasticsearch:elasticsearch
     depends_on:
-      - elasticsearch 
+      - elasticsearch
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  
+      - /var/run/docker.sock:/var/run/docker.sock
 
   request-monitor:
     build:
@@ -57,24 +60,24 @@ services:
       - vdc:vdc
       - elasticsearch:elasticsearch
       - zipkin:zipkin
+    ports:
+      - 8000:8000
     depends_on:
       - vdc
       - elasticsearch
       - zipkin
-    ports:
-      - 8000:8000
-    environment: 
+    environment:
       - "VDC_NAME=osrvdc"
       - "OPENTRACING=on"
+
   zipkin:
     image: openzipkin/zipkin
     ports:
       - 9411:9411
-    environment: 
+    environment:
       - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
       - "COLLECTOR_SAMPLE_RATE=0.1"
       - "STORAGE_TYPE=elasticsearch"
       - "ES_HOSTS=http://elasticsearch:9200"
     links:
       - elasticsearch:elasticsearch
-

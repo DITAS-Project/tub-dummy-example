@@ -14,14 +14,11 @@ services:
       - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
     links:
       - zipkin:zipkin
-    ports:
-      - 9042:9042
-
   elasticsearch:
     image: elasticsearch
     ports:
       - 9200:9200
-    environment: 
+    environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
   vdc:
     build:
@@ -48,18 +45,17 @@ services:
       - vdc
       - elasticsearch
       - zipkin
-    environment: 
+    environment:
       - "VDC_NAME=osrvdc"
       - "OPENTRACING=on"
   zipkin:
     image: openzipkin/zipkin
     ports:
       - 9411:9411
-    environment: 
+    environment:
       - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
       - "COLLECTOR_SAMPLE_RATE=0.1"
       - "STORAGE_TYPE=elasticsearch"
       - "ES_HOSTS=http://elasticsearch:9200"
     links:
       - elasticsearch:elasticsearch
-

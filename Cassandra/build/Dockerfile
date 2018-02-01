@@ -1,4 +1,21 @@
 #############
+# GIT needed for MVN
+#############
+FROM alpine as GIT
+WORKDIR /tmp/
+
+RUN apk --update add git openssh && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm /var/cache/apk/*
+
+#VOLUME /git
+
+ENTRYPOINT ["git"]
+RUN git clone https://github.com/thelastpickle/cassandra-zipkin-tracing.git
+
+############# END GIT
+
+#############
 # MVN needed for a Zipkin tracing plugin for Cassandra
 #############
 FROM openjdk:8-jdk as MAVEN
@@ -201,6 +218,11 @@ RUN echo "-Dcassandra.custom_tracing_class=com.thelastpickle.cassandra.tracing.Z
     echo "-Dcassandra.custom_query_handler_class=org.apache.cassandra.cql3.CustomPayloadMirroringQueryHandler" >> /etc/cassandra/jvm.options && \
     echo "-DZipkinTracing.httpCollectorHost=zipkin" >> /etc/cassandra/jvm.options && \
     echo "-DZipkinTracing.httpCollectorPort=9411" >> /etc/cassandra/jvm.options 
+
+# Configure the Cassandra Tracing level
+
+#RUN sed -i 's/level=\"DEBUG\"/level=\"TRACE\"/g' /etc/cassandra/logback.xml
+#'$i\    <logger name="org.apache.cassandra" level="TRACE"/>' /etc/cassandra/logback.xml
 
 EXPOSE 7000 7001 7199 9042 9160
 CMD ["cassandra", "-f"]
