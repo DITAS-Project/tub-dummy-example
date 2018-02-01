@@ -15,10 +15,10 @@ RUN cd $GOPATH/src/github.com/ingensi/dockbeat && make && make
 RUN mkdir -p /etc/dockbeat/
 ADD dockbeat.yml /etc/dockbeat/
 ADD dockbeat.template.json /etc/dockbeat/
-RUN    cp $GOPATH/src/github.com/ingensi/dockbeat/dockbeat /etc/dockbeat
+RUN cp $GOPATH/src/github.com/ingensi/dockbeat/dockbeat /etc/dockbeat
     #&& cp $GOPATH/src/github.com/ingensi/dockbeat/dockbeat.yml /etc/dockbeat/dockbeat.yml
 
 WORKDIR /etc/dockbeat/
 ENTRYPOINT ["./dockbeat"]
 
-CMD ["-c", "dockbeat.yml", "-v", "-e" ]
+CMD ["-c", "dockbeat.yml"]

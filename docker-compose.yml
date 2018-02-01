@@ -19,11 +19,11 @@ services:
 
   elasticsearch:
     image: elasticsearch
-    environment:
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - 9200:9200
-
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    
   vdc:
     build:
       context: ./vdc-nodered/
@@ -35,11 +35,12 @@ services:
     volumes:
       - ./vdc/mnt:/var/log/mnt
     environment:
-    - "elasticURI=elasticsearch:9200"
+      - "elasticURI=elasticsearch:9200"
     depends_on:
       - cassandra
       - mysql
       - zipkin
+      - elasticsearch
     ports:
       - 8080:8080
 
