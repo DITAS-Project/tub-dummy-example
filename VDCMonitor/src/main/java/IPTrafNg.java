@@ -21,7 +21,7 @@ public class IPTrafNg implements Runnable {
     private static String elastic;
     private static String path;
     private static int count = 0;
-    private static String logFilePath = "/var/log/mnt/testLog";
+    private static String logFilePath = "/opt/vdc/mnt/testLog";
     //private static String logOptions1 = "-i all -B -L ";
     //private static int temp = 0;
     private static String COMMAND = "iptraf-ng";

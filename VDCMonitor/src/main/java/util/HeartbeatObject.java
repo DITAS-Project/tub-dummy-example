@@ -1,18 +1,20 @@
 package util;
 
 public class HeartbeatObject {
-    private static long timestamp;
+    private static long time;
     private long interval;
-    private long time;
+
+    private long timestamp;
+
 
     public HeartbeatObject(){
-        this.time =System.currentTimeMillis();
-        if(timestamp == 0){
+        this.timestamp =System.currentTimeMillis();
+        if(time == 0){
             this.interval= 0;
         }else{
-            this.interval = (time - timestamp);
+            this.interval = (timestamp - time);
         }
-        this.timestamp =time;
+        this.time =timestamp;
     }
 
     public long getInterval(){
@@ -20,7 +22,7 @@ public class HeartbeatObject {
     }
 
     public long getTime(){
-        return time;
+        return timestamp;
     }
 
 

@@ -27,11 +27,14 @@ services:
        - cassandra:cassandra
        - mysql:mysql
        - zipkin:zipkin
+       - elasticsearch:elasticsearch
     depends_on:
        - cassandra
        - mysql
     ports:
       - 8484:8484
+    environment:
+      - "elasticURI=elasticsearch:9200"
   request-monitor:
     build:
       context: ./request-monitor/

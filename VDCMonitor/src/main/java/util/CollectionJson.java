@@ -2,9 +2,9 @@ package util;
 
 public class CollectionJson {
     private long timestamp = System.currentTimeMillis();
-    private String jString;
+    private String throughput;
 
-    public CollectionJson(String jString){
-        this.jString=jString;
+    public CollectionJson(String throughput){
+        this.throughput = throughput;
     }
 }
