@@ -174,9 +174,30 @@ RUN set -x \
   && if [ -n "$tempDir" ]; then \
   	apt-get purge -y --auto-remove \
   	&& rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
-  fi \
-#  && rm -rf logstash-6.1.1.tar.gz 
-  && rm -rf /var/lib/apt/lists/* 
+  fi
+
+
+# get logstash image
+#RUN wget -q -P / https://artifacts.elastic.co/downloads/logstash/logstash-6.1.1.tar.gz
+
+# unpack logstash to /
+#RUN tar -zxf logstash-6.1.1.tar.gz --directory /
+
+# add custom logstash config to directory
+#COPY  logstash.conf  /etc/logstash/conf.d/
+
+#get curl package
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+
+#get filebeat image
+RUN curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.1.2-amd64.deb 
+RUN dpkg -i filebeat-6.1.2-amd64.deb
+
+#setup custom config file
+ADD filebeat.yml /etc/filebeat/
+
+#delete logstash tar
+#RUN rm -rf logstash-6.1.1.tar.gz
 
 # add script to run logstash and nginx
 ADD run.sh /run.sh
@@ -190,6 +211,7 @@ ADD filebeat.yml /etc/filebeat/
 ADD pipeline.json /
 
 ENV OPENTRACING off 
+
 
 STOPSIGNAL SIGTERM
 
