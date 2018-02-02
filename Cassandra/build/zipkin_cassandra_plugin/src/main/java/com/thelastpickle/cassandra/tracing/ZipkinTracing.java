@@ -57,17 +57,13 @@ public final class ZipkinTracing extends Tracing
 
     private final SpanCollector spanCollector
             = HttpSpanCollector.create(HTTP_COLLECTOR_URL, new EmptySpanCollectorMetricsHandler());
-            //= KafkaSpanCollector.create("127.0.0.1:9092", new EmptySpanCollectorMetricsHandler());
 
-    static {
-      System.out.println("Sebastian says: " + HTTP_COLLECTOR_URL);
-    }
     private final Sampler SAMPLER = Sampler.ALWAYS_SAMPLE;
 
     private final AtomicMonotonicTimestampGenerator TIMESTAMP_GENERATOR = new AtomicMonotonicTimestampGenerator();
 
     volatile Brave brave = new Brave
-            .Builder( "c*:" + DatabaseDescriptor.getClusterName() + ":" + FBUtilities.getBroadcastAddress().getHostName())
+            .Builder("cassandra")
             .spanCollector(spanCollector)
             .traceSampler(SAMPLER)
             .clock(() -> { return TIMESTAMP_GENERATOR.next(); })
@@ -183,7 +179,6 @@ public final class ZipkinTracing extends Tracing
         {
             // deprecated aproach
             ByteBuffer bb = ByteBuffer.wrap(bytes);
-
             getServerTracer().setStateCurrentTrace(
                     bb.getLong(),
                     bb.getLong(),

@@ -2,11 +2,15 @@ package de.tub.trace;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.github.kristofa.brave.SpanId;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class Trace implements Serializable {
@@ -19,7 +23,7 @@ public class Trace implements Serializable {
     private final String sampled;
     private final String operation;
 
-    @JsonInclude
+    @JsonInclude @NotNull
     public String getTraceId() {
         return traceId;
     }
@@ -91,5 +95,22 @@ public class Trace implements Serializable {
 
     private String id(){
         return Long.toHexString(new Random().nextLong());
+    }
+
+    public ByteBuffer toBuffer(){
+        SpanId.Builder builder = SpanId.builder().sampled(true);
+        BigInteger traceId = new BigInteger(this.getTraceId(), 16);
+
+        if(traceId.bitLength() > 64) {
+            builder.traceIdHigh(traceId.and(BigInteger.valueOf(Long.MAX_VALUE).shiftLeft(Long.SIZE)).shiftRight(Long.SIZE).longValue()); //get the upper part
+            builder.traceId(traceId.and(BigInteger.valueOf(Long.MAX_VALUE)).longValue());//lower part
+        } else {
+            builder.traceId(traceId.longValue());
+        }
+
+        builder.parentId(new BigInteger(this.getParentSpanId(),16).longValue());
+        builder.spanId(new BigInteger(this.getParentSpanId(),16).longValue());
+
+        return ByteBuffer.wrap(builder.build().bytes());
     }
 }

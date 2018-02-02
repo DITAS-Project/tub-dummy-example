@@ -59,7 +59,7 @@ services:
       - 9411:9411
     environment:
       - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
-      - "COLLECTOR_SAMPLE_RATE=0.1"
+      - "COLLECTOR_SAMPLE_RATE=1.0"
       - "STORAGE_TYPE=elasticsearch"
       - "ES_HOSTS=http://elasticsearch:9200"
     links:
