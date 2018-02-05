@@ -1,0 +1,85 @@
+version: '3'
+services:
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "0der1@b)Opd0Sis0nobxuS[uhId"
+      MYSQL_DATABASE: "DITAS"
+    volumes:
+      - ./MySQL/data/patient.sql:/docker-entrypoint-initdb.d/patient.sql
+  cassandra:
+    build:
+      context: ./Cassandra/build
+    volumes:
+      - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
+    links:
+      - zipkin:zipkin
+  elasticsearch:
+    image: elasticsearch
+    ports:
+      - 9200:9200
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    command: "-Elogger.level=ERROR"
+  
+  dockbeat:
+    build:
+      context: ./dockbeat/
+    links:
+      - elasticsearch:elasticsearch
+    depends_on:
+      - elasticsearch
+
+  vdc:
+    build:
+       context: ./vdc-dummy/
+    links:
+       - cassandra:cassandra
+       - mysql:mysql
+       - zipkin:zipkin
+       - elasticsearch:elasticsearch
+    depends_on:
+       - cassandra
+       - mysql
+    ports:
+      - 8484:8484
+    environment:
+      - "elasticURI=elasticsearch:9200"
+      - "elasticPathURI=vdc-{date}"
+  request-monitor:
+    build:
+      context: ./request-monitor/
+    ports:
+      - 8000:8000
+    links:
+      - vdc:vdc
+      - elasticsearch:elasticsearch
+      - zipkin:zipkin
+    depends_on:
+      - vdc
+      - elasticsearch
+      - zipkin
+    environment:
+      - "VDC_NAME=vdc"
+      - "OPENTRACING=on"
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+    environment:
+      - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
+      - "COLLECTOR_SAMPLE_RATE=1.0"
+      - "STORAGE_TYPE=elasticsearch"
+      - "ES_HOSTS=http://elasticsearch:9200"
+    links:
+      - elasticsearch:elasticsearch
+
+  kibana:
+    image: kibana
+    ports:
+      - 5601:5601
+      - 5044:5044
+    links:
+      - elasticsearch:elasticsearch
+    depends_on:
+      - elasticsearch
