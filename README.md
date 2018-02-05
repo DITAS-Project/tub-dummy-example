@@ -35,9 +35,9 @@ This example has two different VDC's that can be deployed for different testing 
 
 * request-monitor
     * VDC_NAME - set the name of the connected VDC, it is used for indexing in the ES 
-    * OPENTRACING - controlls if nginx uses opentracing or not, default is off
+    * OPENTRACING - controls if nginx uses opentracing or not, default is off
 * zipkin
-    * COLLECTOR_SAMPLE_RATE - Determines the percentage of traces collected by the zipkin database, can be set between 0.0 an 1.0 
+    * COLLECTOR_SAMPLE_RATE - determines the percentage of traces collected by the zipkin database, can be set between 0.0 an 1.0 
     * STORAGE_TYPE - defines the Database type in which the traces are stored, possible types are : mem, mysql, cassandra, elasticsearch
     * ES_HOSTS - sets the elasticsearch host, only used when the storage type is elasticsearch
     
