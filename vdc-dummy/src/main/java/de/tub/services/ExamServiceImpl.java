@@ -124,6 +124,8 @@ public class ExamServiceImpl implements ExamService{
     private Statement instrumentTracing(BoundStatement statement){
         Trace trace = Trace.extractFromThread();
         if(trace != null) {
+            trace = trace.ChildOf("cassandra");
+            helper.push(trace);
             statement.setOutgoingPayload(Collections.singletonMap("zipkin", trace.toBuffer()));
             return statement.enableTracing();
         }

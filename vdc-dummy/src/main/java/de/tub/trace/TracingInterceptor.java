@@ -31,7 +31,7 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
             }
 
             //inject trace into request-object afterwards reachable using Trace.extractFromThread()
-            request.setAttribute("trace",trace);
+            Trace.updateThread(trace);
             tracer.push(trace);
             return  true;
         }

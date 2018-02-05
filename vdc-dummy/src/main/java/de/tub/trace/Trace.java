@@ -69,12 +69,7 @@ public class Trace implements Serializable {
         return String.format("(%s)[%s] %s", parentSpanId, spanId, traceId);
     }
 
-    public static Trace extractFromRequest(HttpServletRequest request){
-        return new Trace(request.getHeader("X-B3-TraceId"),
-                request.getHeader("X-B3-ParentSpanId "),
-                request.getHeader("X-B3-SpanId"),
-                request.getHeader("X-B3-Sampled"));
-    }
+
 
     public static Trace extractFromThread(){
         Object trace = RequestContextHolder.currentRequestAttributes().getAttribute("trace", RequestAttributes.SCOPE_REQUEST);
@@ -83,6 +78,9 @@ public class Trace implements Serializable {
         } else {
             return null;
         }
+    }
+    public static void updateThread(Trace trace) {
+        RequestContextHolder.currentRequestAttributes().setAttribute("trace",trace,RequestAttributes.SCOPE_REQUEST);
     }
 
     public Trace ChildOf(String operation){
@@ -112,5 +110,12 @@ public class Trace implements Serializable {
         builder.spanId(new BigInteger(this.getParentSpanId(),16).longValue());
 
         return ByteBuffer.wrap(builder.build().bytes());
+    }
+
+    public static Trace extractFromRequest(HttpServletRequest request){
+        return new Trace(request.getHeader("X-B3-TraceId"),
+                request.getHeader("X-B3-ParentSpanId "),
+                request.getHeader("X-B3-SpanId"),
+                request.getHeader("X-B3-Sampled"));
     }
 }
