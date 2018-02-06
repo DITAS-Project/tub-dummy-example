@@ -20,13 +20,11 @@ public class VDCMonitor {
 
         waitForConnection(config);
 
-
         ScheduledExecutorService jobRunner = Executors.newScheduledThreadPool(2);
 
         jobRunner.scheduleAtFixedRate(new Heartbeat(config),5,config.invocationInverval, TimeUnit.MILLISECONDS);
         jobRunner.scheduleAtFixedRate(new IPTrafNg(config),5,config.invocationInverval, TimeUnit.MILLISECONDS);
         Logger.info("started VDC Monitor");
-
     }
 
     private static void waitForConnection(MonitorConfig config) {
