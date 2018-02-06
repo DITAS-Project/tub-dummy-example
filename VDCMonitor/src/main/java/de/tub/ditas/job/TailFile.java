@@ -15,29 +15,28 @@ public class TailFile implements Runnable {
     private static ArrayList<WhitelistObject> whitelistObjects;
 
     public TailFile() {
-        whitelistObjects= IPTrafNgPars.getInstance().getWhitelist();
+        whitelistObjects = IPTrafNgPars.getInstance().getWhitelist();
     }
 
     public void run() {
-            Path logFile = Paths.get(tail);
-            MyListener listener = new MyListener();
-            Tailer blu = new Tailer(logFile.toFile(), listener, 100);
-            blu.run();
+        Path logFile = Paths.get(tail);
+        MyListener listener = new MyListener();
+        Tailer blu = new Tailer(logFile.toFile(), listener, 100);
+        blu.run();
     }
 
     public static class MyListener extends TailerListenerAdapter {
 
 
-
-        public MyListener(){
-            ArrayList<WhitelistObject>whitelist= IPTrafNgPars.getInstance().getWhitelist();
+        public MyListener() {
+            ArrayList<WhitelistObject> whitelist = IPTrafNgPars.getInstance().getWhitelist();
         }
 
         @Override
         public void handle(String line) {
-            System.out.println("Tail Handling: " + line);
-            String [] args = line.split(";");
-            WhitelistObject wl = new WhitelistObject(args[0],args[1]);
+            line = line.replace('(', ' ').replace(')', ' ').replace('\'', ' ').trim();
+            String[] args = line.split(",");
+            WhitelistObject wl = new WhitelistObject(args[1], args[0]);
             whitelistObjects.add(wl);
         }
     }
