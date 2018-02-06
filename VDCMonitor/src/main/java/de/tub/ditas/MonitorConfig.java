@@ -35,7 +35,6 @@ public class MonitorConfig {
         } else {
             interval = Integer.parseInt(ipinterval);
         }
-
         return new MonitorConfig(elastic, index, interval);
     }
 

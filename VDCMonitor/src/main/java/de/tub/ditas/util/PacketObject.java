@@ -1,13 +1,16 @@
 package de.tub.ditas.util;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
 public class PacketObject {
 
-
+    private DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
     private String date;
     private int bytes;
     private String sender;
     private String receiver;
-    private long timestamp = System.currentTimeMillis();
+    private String timestamp = dateParser.print(System.currentTimeMillis());
 
 
     public PacketObject(String protocol, String date, int bytes , String sender, String receiver){
@@ -49,7 +52,7 @@ public class PacketObject {
         this.receiver = receiver;
     }
 
-    public long getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 }
