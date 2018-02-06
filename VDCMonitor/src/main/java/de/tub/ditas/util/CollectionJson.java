@@ -1,4 +1,4 @@
-package util;
+package de.tub.ditas.util;
 
 public class CollectionJson {
     private long timestamp = System.currentTimeMillis();

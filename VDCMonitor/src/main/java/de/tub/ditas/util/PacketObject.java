@@ -1,4 +1,4 @@
-package util;
+package de.tub.ditas.util;
 
 public class PacketObject {
 
@@ -7,6 +7,8 @@ public class PacketObject {
     private int bytes;
     private String sender;
     private String receiver;
+    private long timestamp = System.currentTimeMillis();
+
 
     public PacketObject(String protocol, String date, int bytes , String sender, String receiver){
         this.date= date;
@@ -47,4 +49,7 @@ public class PacketObject {
         this.receiver = receiver;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
 }

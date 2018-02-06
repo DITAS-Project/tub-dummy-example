@@ -1,4 +1,4 @@
-package util;
+package de.tub.ditas.util;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;

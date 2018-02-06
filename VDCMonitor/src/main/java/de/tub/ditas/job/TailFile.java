@@ -1,13 +1,13 @@
+package de.tub.ditas.job;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import de.tub.ditas.util.IPTrafNgPars;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListenerAdapter;
-import util.WhitelistObject;
+import de.tub.ditas.util.WhitelistObject;
 
 public class TailFile implements Runnable {
     private static String tail = "/opt/vdc/mnt/whitelist";

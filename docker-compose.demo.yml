@@ -45,7 +45,8 @@ services:
       - 8484:8484
     environment:
       - "elasticURI=elasticsearch:9200"
-      - "elasticPathURI=vdc-{date}"
+      - "elasticPathURI=vdc"
+      - "loglevel=ALL"
   request-monitor:
     build:
       context: ./request-monitor/

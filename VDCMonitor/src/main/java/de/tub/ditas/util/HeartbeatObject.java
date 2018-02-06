@@ -1,4 +1,4 @@
-package util;
+package de.tub.ditas.util;
 
 public class HeartbeatObject {
     private static long time;
@@ -8,7 +8,7 @@ public class HeartbeatObject {
 
 
     public HeartbeatObject(){
-        this.timestamp =System.currentTimeMillis();
+        this.timestamp = System.currentTimeMillis();
         if(time == 0){
             this.interval= 0;
         }else{
@@ -24,7 +24,5 @@ public class HeartbeatObject {
     public long getTime(){
         return timestamp;
     }
-
-
 
 }

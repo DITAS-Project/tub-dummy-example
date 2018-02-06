@@ -1,5 +1,6 @@
-import util.PacketObject;
-import util.WhitelistObject;
+package de.tub.ditas.util;
+
+import org.pmw.tinylog.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class IPTrafNgPars {
      * @throws IOException
      */
     public  ArrayList<PacketObject> readFile(String filePath) throws IOException {
-        System.out.println("Read file");
+        Logger.debug("Read file");
         File auszug = new File(filePath);
         FileReader g = new FileReader(auszug);
         BufferedReader br = new BufferedReader(g);
