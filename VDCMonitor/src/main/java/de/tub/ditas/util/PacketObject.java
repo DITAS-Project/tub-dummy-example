@@ -5,7 +5,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 public class PacketObject {
 
-    private DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
+    private transient DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
     private String date;
     private int bytes;
     private String sender;

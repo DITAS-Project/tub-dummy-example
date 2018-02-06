@@ -129,7 +129,7 @@ public class IPTrafNgPars {
      * @return
      */
     public ArrayList<PacketObject> reduceWhitelist(ArrayList<PacketObject> objects) throws NullPointerException {
-        if (whitelist.isEmpty()) {
+        if (!whitelist.isEmpty()) {
             ArrayList<PacketObject> temp = new ArrayList<>();
             for (PacketObject x : objects) {
                 for (WhitelistObject y : whitelist) {

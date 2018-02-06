@@ -8,7 +8,7 @@ public class HeartbeatObject {
     private long interval;
 
     private String timestamp;
-    private DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
+    private transient DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
 
 
 
