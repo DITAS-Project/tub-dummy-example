@@ -11,23 +11,26 @@ public class IPTrafNgPars {
     private ArrayList<WhitelistObject> whitelist = new ArrayList<>();
     private static IPTrafNgPars ngPars = null;
 
-    public static synchronized IPTrafNgPars getInstance(){
-        if(ngPars==null){
+    public static synchronized IPTrafNgPars getInstance() {
+        if (ngPars == null) {
             ngPars = new IPTrafNgPars();
         }
         return ngPars;
 
     }
-    private IPTrafNgPars(){
+
+    private IPTrafNgPars() {
     }
+
     /**
      * Reads the given file and uses methods createObject and reduceObjects
      * to create a list of all connections in the file
+     *
      * @param filePath
      * @return
      * @throws IOException
      */
-    public  ArrayList<PacketObject> readFile(String filePath) throws IOException {
+    public ArrayList<PacketObject> readFile(String filePath) throws IOException {
         Logger.debug("Read file");
         File auszug = new File(filePath);
         FileReader g = new FileReader(auszug);
@@ -53,6 +56,7 @@ public class IPTrafNgPars {
 
     /**
      * reduces verbose lines from the objects list with the help of other methods
+     *
      * @param objects
      * @return
      */
@@ -88,14 +92,16 @@ public class IPTrafNgPars {
         }).collect(Collectors.toList());
         try {
             build = reduceWhitelist(build);
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
         build = reduceHelper(build);
         return build;
     }
+
     /**
      * reduces verbose lines from the objects list and sums up the bytes send
+     *
      * @param objects
      * @return
      */
@@ -118,30 +124,31 @@ public class IPTrafNgPars {
 
     /**
      * Throws out all the elements that are not part of the whitelist
+     *
      * @param objects
      * @return
      */
     public ArrayList<PacketObject> reduceWhitelist(ArrayList<PacketObject> objects) throws NullPointerException {
-        ArrayList<PacketObject> temp = new ArrayList<>();
-        for (PacketObject x : objects) {
-            for (WhitelistObject y : ngPars.whitelist) {
-                if (x.getReceiver().contains(y.getIp())) {
-                    //System.out.println("Erste If Anweisung");
-                    x.setReceiver(y.getName());
-                    if (x.getSender().contains(y.getIp())) {
-                        //System.out.println("Zweite If Anweisung");
-
+        if (whitelist.isEmpty()) {
+            ArrayList<PacketObject> temp = new ArrayList<>();
+            for (PacketObject x : objects) {
+                for (WhitelistObject y : whitelist) {
+                    if (x.getReceiver().contains(y.getIp())) {
+                        x.setReceiver(y.getName());
+                        if (x.getSender().contains(y.getIp())) {
+                            x.setSender(y.getName());
+                        }
+                        temp.add(x);
+                    } else if (x.getSender().contains(y.getIp())) {
                         x.setSender(y.getName());
+                        temp.add(x);
                     }
-                    temp.add(x);
-                }else if(x.getSender().contains(y.getIp())){
-                    //System.out.println("Else If Anweisung");
-                    x.setSender(y.getName());
-                    temp.add(x);
                 }
             }
+            return temp;
         }
-        return temp;
+            return objects;
+
     }
 
 
