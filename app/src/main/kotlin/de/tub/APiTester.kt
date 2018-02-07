@@ -18,6 +18,8 @@ package de.tub
 
 import de.tub.api.APIException
 import de.tub.api.VDCClient
+import me.tongfei.progressbar.ProgressBar
+import me.tongfei.progressbar.ProgressBarStyle
 import mu.KotlinLogging
 import java.util.*
 import kotlin.system.measureTimeMillis
@@ -31,9 +33,9 @@ fun main(args: Array<String>) {
         "localhost"
     }
 
-    val client = VDCClient(host, 8080)
+    val client = VDCClient(host, 8000)
 
-    logger.info("starting test run on http://{}:{}",client.host,client.port)
+    logger.info("starting test run on http://${client.host}:${client.port}")
 
     val rand:Random = Random()
 
@@ -41,7 +43,7 @@ fun main(args: Array<String>) {
     while (true){
         performAPITest(rand, client)
         val waitTime = rand.nextInt(20)*1000L
-        logger.info ("perfroming next round in {}s",waitTime/1000)
+        logger.info ("performing next round in ${waitTime/1000}s")
         Thread.sleep(waitTime)
     }
 
@@ -52,8 +54,11 @@ private fun performAPITest(rand: Random, client: VDCClient) {
 
     var fail = 0
     var success = 0
-
+    var pb = ProgressBar("", requests.toLong(), ProgressBarStyle.ASCII)
+    pb.start()
+    pb.setExtraMessage("getPatient")
     val getPatient = measureTimeMillis({
+
         for (i in 1..requests) {
             val ssn = rand.nextInt(50)
             try {
@@ -62,14 +67,19 @@ private fun performAPITest(rand: Random, client: VDCClient) {
             } catch (e: APIException) {
                 fail++
             }
+            pb.step()
         }
+
     })
+
     logger.info("getPatient for {} runs took {}ms with {} success and {} failed. {}ms per request", requests, getPatient, success, fail, (getPatient/requests))
 
     fail = 0;
     success = 0;
-
+    pb.stepTo(0)
+    pb.setExtraMessage("getExam")
     val getExam = measureTimeMillis({
+
         for (i in 1..requests) {
             val ssn = rand.nextInt(50)
             try {
@@ -78,16 +88,18 @@ private fun performAPITest(rand: Random, client: VDCClient) {
             } catch (e: APIException) {
                 fail++
             }
+            pb.step()
         }
     })
+
     logger.info("getExam for {} runs took {}ms with {} success and {} failed {}ms per request", requests, getExam, success, fail, (getExam/requests))
 
-    fail = 0;
-    success = 0;
-
+    fail = 0
+    success = 0
+    pb.stepTo(0)
+    pb.setExtraMessage("find")
     val find = measureTimeMillis({
         for (i in 1..requests) {
-
             try {
                 var maxAge: Int? = null
                 var minAge: Int? = null
@@ -107,7 +119,10 @@ private fun performAPITest(rand: Random, client: VDCClient) {
             } catch (e: APIException) {
                 fail++
             }
+            pb.step()
         }
+
     })
+    pb.stop()
     logger.info("find for {} runs took {}ms with {} success and {} failed {}ms per request", requests, find, success, fail, (find/requests))
 }
