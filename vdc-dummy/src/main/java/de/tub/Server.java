@@ -49,25 +49,20 @@ public class Server implements CommandLineRunner {
 
         SpringApplication application =
                 new SpringApplicationBuilder(Server.class)
-                .initializers(new ApplicationContextInitializer<ConfigurableApplicationContext>() {
-                    @Override
-                    public void initialize(ConfigurableApplicationContext ctx) {
+                .initializers((ApplicationContextInitializer<ConfigurableApplicationContext>) ctx -> {
 
-                        String cassandraURI = ctx.getEnvironment().getProperty("cassandra.uri");
-                        String databaseURI = ctx.getEnvironment().getProperty("spring.datasource.url");
+                    String cassandraURI = ctx.getEnvironment().getProperty("cassandra.uri");
+                    String databaseURI = ctx.getEnvironment().getProperty("spring.datasource.url");
 
-                        String user = ctx.getEnvironment().getProperty("spring.datasource.username");
-                        String pass = ctx.getEnvironment().getProperty("spring.datasource.password");
+                    String user = ctx.getEnvironment().getProperty("spring.datasource.username");
+                    String pass = ctx.getEnvironment().getProperty("spring.datasource.password");
 
-                        System.out.println("wait for databases to settle");
-                        waitUntilReachable(cassandraURI);
-                        waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
+                    System.out.println("wait for databases to settle");
+                    waitUntilReachable(cassandraURI);
+                    waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
 
-                        waitForCassandra(cassandraURI);
-                        waitForMySQL(databaseURI,user,pass);
-                    }
-
-
+                    waitForCassandra(cassandraURI);
+                    waitForMySQL(databaseURI,user,pass);
                 })
                 .application();
 
@@ -97,7 +92,7 @@ public class Server implements CommandLineRunner {
     private static boolean waitForMySQL(String uri, String user, String pass) {
 
         while(!pingMySQL(uri,user,pass)){
-            System.out.println("wait for "+uri.substring(0,uri.lastIndexOf(":")));
+            System.out.println("wait for "+uri);
             try {
                 Thread.sleep(3600);
             } catch (InterruptedException e) {}
@@ -114,6 +109,7 @@ public class Server implements CommandLineRunner {
             connection.close();
             return true;
         } catch(Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

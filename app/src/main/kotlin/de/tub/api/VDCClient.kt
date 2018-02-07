@@ -16,6 +16,7 @@
 
 package de.tub.api
 
+import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import de.tub.model.Exam
@@ -29,7 +30,7 @@ import java.time.LocalDate
 class VDCClient(val host:String = "localhost",val port:Int) {
     private val client: OkHttpClient = OkHttpClient()
 
-    private val mapper = jacksonObjectMapper()
+    private val mapper = jacksonObjectMapper().configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
 
     public fun getPatient(ssn:Int): Patient? {
         val url = HttpUrl.Builder().scheme("http").host(host).port(port)

@@ -35,7 +35,8 @@
         "wires": [
             [
                 "8f2679ff.f37608",
-                "e5d63321.fe35e8"
+                "e5d63321.fe35e8",
+                "e7254f63.f2e348"
             ]
         ]
     },
@@ -118,7 +119,8 @@
         "y": 488,
         "wires": [
             [
-                "23212b6f.48ee4c"
+                "23212b6f.48ee4c",
+                "ef2da763.ae342"
             ]
         ]
     },
@@ -132,5 +134,116 @@
         "x": 958,
         "y": 482,
         "wires": []
+    },
+    {
+        "z": "5f08c6b7.a687b8",
+        "name": "extractTrace",
+        "func": "var traceid = msg.req.headers['x-b3-traceid']\nvar spanid =  msg.req.headers['x-b3-spanid']\nvar sampled = msg.req.headers['x-b3-sampled']\nvar parentspanid = msg.req.headers['x-b3-parentspanid']\n\nif (sampled === \"1\") {\n    msg.payload = {\n        traceid:traceid,\n        spanid:(Math.random()*0xFFFFFFFFFFFFFF<<0).toString(16),\n        parentspanid:spanid,\n        operation:\"nodered\",\n    }\n}\nmsg.topic = \"trace\"\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 370,
+        "y": 340,
+        "wires": [
+            [
+                "bf4e38b8.65883",
+                "430c37ae.267af8"
+            ]
+        ]
+    },
+    {
+        "id": "bf4e38b8.65883",
+        "type": "http request",
+        "z": "5f08c6b7.a687b8",
+        "name": "begin Trace",
+        "method": "PUT",
+        "ret": "txt",
+        "url": "http://localhost:8484/v1/trace",
+        "tls": "",
+        "x": 630,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "30e498e0.01e0f",
+        "type": "function",
+        "z": "5f08c6b7.a687b8",
+        "name": "completTrace",
+        "func": "msg.payload = msg.payload.trace\nvar traceid = msg.payload.traceid\nvar spanid =  msg.payload.spanid\nvar parentspanid = msg.payload.parentspanid\n\nmsg.payload = {\n    traceid:traceid,\n    spanid:spanid,\n    parentspanid:parentspanid,\n    operation:\"nodered\",\n}\n\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1040,
+        "y": 320,
+        "wires": [
+            [
+                "df00a254.5d53f"
+            ]
+        ]
+    },
+    {
+        "id": "df00a254.5d53f",
+        "type": "http request",
+        "z": "5f08c6b7.a687b8",
+        "name": "close trace",
+        "method": "POST",
+        "ret": "txt",
+        "url": "http://localhost:8484/v1/close",
+        "tls": "",
+        "x": 1210,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "430c37ae.267af8",
+        "type": "join",
+        "z": "5f08c6b7.a687b8",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "2",
+        "x": 890,
+        "y": 320,
+        "wires": [
+            [
+                "30e498e0.01e0f"
+            ]
+        ]
+    },
+    {
+        "id": "ef2da763.ae342",
+        "type": "change",
+        "z": "5f08c6b7.a687b8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 740,
+        "y": 360,
+        "wires": [
+            [
+                "430c37ae.267af8"
+            ]
+        ]
     }
 ]

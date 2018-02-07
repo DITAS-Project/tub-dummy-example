@@ -20,21 +20,24 @@ import com.datastax.driver.core.*;
 import com.datastax.driver.mapping.MappingManager;
 import de.tub.model.Exam;
 import de.tub.model.Patient;
-import de.tub.util.JodaTimeCodec;
-import org.joda.time.DateTime;
+import de.tub.trace.Trace;
+import de.tub.trace.TraceHelper;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
 public class ExamServiceImpl implements ExamService{
+
+    @Autowired
+    TraceHelper helper;
 
     private final MappingManager manager;
     private final Session session;
@@ -42,10 +45,12 @@ public class ExamServiceImpl implements ExamService{
     final PreparedStatement listAll;
     final PreparedStatement listAllBySSN;
 
-    final PreparedStatement serach;
+    private final PreparedStatement serach;
     private final PreparedStatement openBegin;
     private final PreparedStatement openEnd;
     private final PreparedStatement filterBySSN;
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public ExamServiceImpl(@Value("${cassandra.uri}") String uri, @Value("${cassandra.keyspace}") String keyspace){
         System.out.println(uri);
@@ -67,48 +72,63 @@ public class ExamServiceImpl implements ExamService{
 
     @Override
     public Iterable<Exam> listAllExams() {
-        return manager.mapper(Exam.class).map(session.execute(listAll.bind()));
+        return helper.wrapCall(()-> map(session.execute(instrumentTracing(listAll.bind()))));
+    }
+
+    private Iterable<Exam> map(ResultSet set){
+        return manager.mapper(Exam.class).map(set);
     }
 
     @Override
     public Iterable<Exam> listExamsBy(Iterable<Patient> ssn, LocalDate start, LocalDate end, String type) {
-
-        LinkedList<Integer> ssns = StreamSupport.stream(ssn.spliterator(),false).map(Patient::getSSN).map(Long::intValue).collect(Collectors.toCollection(LinkedList::new));
-        if(start != null && end != null) {
-            return serach(start, end, ssns);
-        } else if(start != null){
-            return openEnd(ssns,start);
-        } else if(end != null){
-            return openBegin(ssns,end);
-        } else {
-            return filterBySSN(ssns);
-        }
+        return helper.wrapCall(()-> {
+            LinkedList<Integer> ssns = StreamSupport.stream(ssn.spliterator(), false).map(Patient::getSSN).map(Long::intValue).collect(Collectors.toCollection(LinkedList::new));
+            if (start != null && end != null) {
+                return serach(start, end, ssns);
+            } else if (start != null) {
+                return openEnd(ssns, start);
+            } else if (end != null) {
+                return openBegin(ssns, end);
+            } else {
+                return filterBySSN(ssns);
+            }
+        },"listExamsBy");
     }
 
     private Iterable<Exam> filterBySSN(LinkedList<Integer> ssns) {
-        return manager.mapper(Exam.class).map(session.execute(filterBySSN.bind(ssns)));
+        return map(session.execute(instrumentTracing(filterBySSN.bind(ssns))));
     }
 
     private Iterable<Exam> serach(LocalDate start, LocalDate end, LinkedList<Integer> ssns) {
-        return manager.mapper(Exam.class).map(session.execute(serach.bind(ssns, start.toDate(), end.toDate())));
+        return map(session.execute(instrumentTracing(serach.bind(ssns, start.toDate(), end.toDate()))));
     }
 
     private Iterable<Exam> openBegin(LinkedList<Integer> ssns, LocalDate end) {
-        return manager.mapper(Exam.class).map(session.execute(openBegin.bind(ssns, end.toDate())));
+        return map(session.execute(instrumentTracing(openBegin.bind(ssns, end.toDate()))));
     }
 
     private Iterable<Exam> openEnd(LinkedList<Integer> ssns, LocalDate start) {
-        return manager.mapper(Exam.class).map(session.execute(openEnd.bind(ssns, start.toDate())));
+        return map(session.execute(instrumentTracing(openEnd.bind(ssns, start.toDate()))));
     }
 
     @Override
     public Iterable<Exam> getExamBySSN(Long ssn) {
-       return manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue())));
-
+        return helper.wrapCall(()-> map(session.execute(instrumentTracing(listAllBySSN.bind(ssn.intValue())))),"getExamsBySSN");
     }
 
     @Override
     public Iterable<Exam> getExamBy(Long ssn, String type) {
-        return manager.mapper(Exam.class).map(session.execute(listAllBySSN.bind(ssn.intValue())));
+        return helper.wrapCall(()-> map(session.execute(instrumentTracing(listAllBySSN.bind(ssn.intValue())))),"getExamBy");
+    }
+
+    private Statement instrumentTracing(BoundStatement statement){
+        Trace trace = Trace.extractFromThread();
+        if(trace != null) {
+            trace = trace.ChildOf("cassandra");
+            helper.push(trace);
+            statement.setOutgoingPayload(Collections.singletonMap("zipkin", trace.toBuffer()));
+            return statement.enableTracing();
+        }
+        return statement;
     }
 }

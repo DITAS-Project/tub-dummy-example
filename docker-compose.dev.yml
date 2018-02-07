@@ -1,0 +1,54 @@
+version: '3'
+services:
+  mysql:
+    image: mysql
+    ports:
+      - 6603:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "0der1@b)Opd0Sis0nobxuS[uhId"
+      MYSQL_DATABASE: "DITAS"
+    volumes:
+      - ./MySQL/data/patient.sql:/docker-entrypoint-initdb.d/patient.sql
+  cassandra:
+    build:
+      context: ./Cassandra/build
+    ports:
+      - 7000:7000
+      - 7001:7001
+      - 9042:9042
+      - 9160:9160
+    volumes:
+      - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
+  elasticsearch:
+    image: elasticsearch
+    ports:
+      - 9200:9200
+    environment: 
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  request-monitor:
+   build:
+    context: ./request-monitor/
+    depends_on:
+     - elasticsearch
+    ports:
+      - 8000:8000
+    environment: 
+      - "VDC_NAME=osrvdc"
+    links:
+     - elasticsearch:elasticsearch
+      - zipkin:zipkin
+    extra_hosts: 
+      - "vdc:${ip}"
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+     - 9411:9411
+    environment: 
+      - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG
+      - "COLLECTOR_SAMPLE_RATE=0.1"
+      - "STORAGE_TYPE=elasticsearch"
+      - "ES_HOSTS=http://elasticsearch:9200"
+    links:
+      - elasticsearch:elasticsearch
+
+

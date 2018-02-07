@@ -65,3 +65,5 @@ hs_err_pid*
 build/
 gradle*
 *.iml
+app/bin/
+app/.project
