@@ -15,6 +15,9 @@
  */
 
 package de.tub.model
+
+import com.fasterxml.jackson.annotation.JsonValue
+
 /**
  * 
  * @param SSN 

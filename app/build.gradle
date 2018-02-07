@@ -15,10 +15,14 @@
  */
 
 buildscript {
-    ext.kotlin_version = '1.1.51'
+    ext.kotlin_version = '1.2.10'
+    ext.ktor_version = '0.9.1'
     repositories {
         mavenCentral()
+        maven { url  "http://dl.bintray.com/kotlin/ktor" }
+        maven { url "https://dl.bintray.com/kotlin/kotlinx" }
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -30,10 +34,12 @@ apply plugin: 'application'
 mainClassName = 'de.tub.APiTesterKt'
 
 defaultTasks 'run'
-
 repositories {
     mavenCentral()
+    maven { url  "http://dl.bintray.com/kotlin/ktor" }
+    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
 }
+
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -42,8 +48,10 @@ dependencies {
     compile "org.slf4j:slf4j-api:1.7.25"
     compile "org.slf4j:slf4j-simple:1.7.25"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0"
-
+    compile 'me.tongfei:progressbar:0.5.5'
     testCompile 'junit:junit:4.11'
+    testCompile "io.ktor:ktor-server-core:$ktor_version"
+    testCompile "io.ktor:ktor-server-netty:$ktor_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
 
