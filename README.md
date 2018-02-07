@@ -5,7 +5,7 @@ All elements of this project are just mock versions of the final runtime (VDC, a
 
 This example represents a snapshot of an already deployed VDC with two attached databases and one application connected ot the vdc.
 
-![Architecture Image](https://github.com/DITAS-Project/tub-dummy-example/Architecture.png)
+![Architecture Image](https://raw.githubusercontent.com/DITAS-Project/tub-dummy-example/master/Architecture.png)
 ### Usage:
 use ```docker-compose -f docker-compose.java.yml up ``` to start the vdc and its databases.
 
