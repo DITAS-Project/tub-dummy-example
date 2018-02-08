@@ -30,6 +30,8 @@ func main() {
 
 	flag.Parse()
 
+	log.SetLevel(log.DebugLevel)
+
 	agent, err := newAgent(*zipkinAddressPtr, true, *vdcAddressPtr)
 
 	if err != nil {
@@ -37,6 +39,11 @@ func main() {
 		os.Exit(-1)
 	}
 
+	startServer(agent, *portPtr, wait)
+
+}
+
+func startServer(agent *agent, port int, waitTime time.Duration) {
 	//setup routing
 	apiRouter := mux.NewRouter()
 	apiRouter.NotFoundHandler = http.HandlerFunc(notFound)
@@ -47,7 +54,7 @@ func main() {
 
 	//start server
 	api := &http.Server{
-		Addr:         fmt.Sprintf(":%d", *portPtr),
+		Addr:         fmt.Sprintf(":%d", port),
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
@@ -55,7 +62,7 @@ func main() {
 	}
 
 	go func() {
-		log.Infof("Listening on :%d", *portPtr)
+		log.Infof("Listening on :%d", port)
 		if err := api.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
@@ -67,50 +74,12 @@ func main() {
 
 	<-c
 
-	ctx, cancel := context.WithTimeout(context.Background(), wait)
+	ctx, cancel := context.WithTimeout(context.Background(), waitTime)
 	defer cancel()
 	agent.Shutdown()
 	api.Shutdown(ctx)
 	log.Info("shutting down")
 	os.Exit(0)
-
-}
-
-type agent struct {
-	spans     map[string]opentracing.Span
-	collector zipkin.Collector
-}
-
-func newAgent(zipkinAddressPtr string, debug bool, vdcAddress string) (*agent, error) {
-	// Create our HTTP collector.
-	collector, err := zipkin.NewHTTPCollector(zipkinAddressPtr)
-
-	if err != nil {
-		log.Errorf("unable to create Zipkin HTTP collector: %+v\n", err)
-		return nil, err
-	}
-
-	// Create our recorder.
-	recorder := zipkin.NewRecorder(collector, debug, vdcAddress, "vdc-agent")
-
-	tracer, err := zipkin.NewTracer(recorder)
-	if err != nil {
-		log.Errorf("unable to create Zipkin tracer: %+v\n", err)
-		return nil, err
-	}
-
-	opentracing.InitGlobalTracer(tracer)
-
-	var ctx = agent{
-		spans:     make(map[string]opentracing.Span),
-		collector: collector,
-	}
-
-	return &ctx, nil
-}
-
-func (a *agent) Shutdown() {
-	a.collector.Close()
 }
 
 type traceMessage struct {
@@ -151,17 +120,83 @@ func (t traceMessage) build() *zipkin.SpanContext {
 	return &context
 }
 
-type logMessage struct {
-	Message string `json:"message"`
+type agent struct {
+	spans     map[string]opentracing.Span
+	collector zipkin.Collector
+}
+
+func newAgent(zipkinAddressPtr string, debug bool, vdcAddress string) (*agent, error) {
+	// Create our HTTP collector.
+	collector, err := zipkin.NewHTTPCollector(zipkinAddressPtr)
+
+	if err != nil {
+		log.Errorf("unable to create Zipkin HTTP collector: %+v\n", err)
+		return nil, err
+	}
+
+	// Create our recorder.
+	recorder := zipkin.NewRecorder(collector, debug, vdcAddress, "vdc-agent")
+
+	tracer, err := zipkin.NewTracer(recorder,
+		zipkin.WithLogger(zipkin.LoggerFunc(func(kv ...interface{}) error {
+			log.Info(kv)
+			return nil
+		})),
+		zipkin.DebugMode(debug),
+		zipkin.DebugAssertUseAfterFinish(debug),
+		zipkin.DebugAssertUseAfterFinish(debug),
+	)
+
+	if err != nil {
+		log.Errorf("unable to create Zipkin tracer: %+v\n", err)
+		return nil, err
+	}
+
+	opentracing.InitGlobalTracer(tracer)
+
+	var ctx = agent{
+		spans:     make(map[string]opentracing.Span),
+		collector: collector,
+	}
+
+	return &ctx, nil
+}
+
+func (a *agent) Shutdown() {
+	a.collector.Close()
 }
 
 func notFound(w http.ResponseWriter, req *http.Request) {
 	log.Infof("request not found", req.URL)
 }
+func (a *agent) getSpan(trace traceMessage) opentracing.Span {
+
+	if span, ok := a.spans[trace.TraceId+trace.SpanId]; ok {
+		log.Infof("updateing trace %s", trace.SpanId)
+		return span
+	}
+
+	log.Infof("building trace %s", trace.SpanId)
+	var context = trace.build()
+
+	if context != nil {
+		span := opentracing.StartSpan(trace.Operation, ext.RPCServerOption(*context))
+		a.spans[trace.TraceId+trace.SpanId] = span
+		log.Infof("trace %s build", trace.SpanId)
+		return span
+	}
+
+	return opentracing.StartSpan(trace.Operation)
+
+}
 
 func (a *agent) trace(w http.ResponseWriter, req *http.Request) {
+	log.Info("got trace request")
+
 	var trace traceMessage
 	_ = json.NewDecoder(req.Body).Decode(&trace)
+
+	log.Infof("trace request for %s : %s", trace.SpanId, trace.Operation)
 
 	span := a.getSpan(trace)
 
@@ -170,26 +205,13 @@ func (a *agent) trace(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a *agent) getSpan(trace traceMessage) opentracing.Span {
-
-	if span, ok := a.spans[trace.TraceId+trace.SpanId]; ok {
-		return span
-	}
-
-	var context = trace.build()
-	if context != nil {
-		span := opentracing.StartSpan(trace.Operation, ext.RPCServerOption(*context))
-		a.spans[trace.TraceId+trace.SpanId] = span
-		return span
-	}
-
-	return opentracing.StartSpan(trace.Operation)
-
-}
-
 func (a *agent) close(w http.ResponseWriter, req *http.Request) {
+	log.Info("got trace finish request")
+
 	var trace traceMessage
 	_ = json.NewDecoder(req.Body).Decode(&trace)
+
+	log.Infof("trace request for %s : %s", trace.SpanId, trace.Operation)
 
 	a.getSpan(trace).Finish()
 }
