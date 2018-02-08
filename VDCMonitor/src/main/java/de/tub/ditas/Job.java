@@ -29,4 +29,19 @@ public abstract class Job implements Runnable{
             Logger.error(e,"could not send "+type+" data");
         }
     }
+
+    public void sendToElasticBulk(String payload,String type) {
+        HttpRequestWithBody request = Unirest.post(config.getElasticSearchURL()+"/_bulk");
+        request.body(payload);
+        request.header("content-type", "application/json; charset=UTF-8 ");
+        try {
+            HttpResponse<JsonNode> jResponse = request.asJson();
+            Logger.debug("send "+type+" data got"+jResponse.getStatus() );
+            System.out.println(jResponse.getBody());
+            System.out.println(payload);
+        } catch (UnirestException e) {
+            Logger.error(e,"could not send "+type+" data");
+        }
+    }
+
 }

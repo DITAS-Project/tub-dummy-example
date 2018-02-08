@@ -34,6 +34,7 @@ public class IPTrafNg extends Job {
     /**
      * Calls a commandline tool to measure traffic and uses de.tub.ditas.util.IPTrafNgPars to parse the data
      * Then it sends the measure data to the elasticseach DB
+     *
      * @throws IOException
      */
     private void CallIPTraf() throws IOException {
@@ -43,10 +44,11 @@ public class IPTrafNg extends Job {
         while (process.isAlive()) {
             try {
                 Thread.sleep(500);
-            } catch (InterruptedException ignored) { }
+            } catch (InterruptedException ignored) {
+            }
         }
         ArrayList<PacketObject> ipObjects = IPTrafNgPars.getInstance().readFile(logFilePath);
-        sendList(ipObjects);
+        sendBulk(ipObjects);
         new File(logFilePath).delete();
     }
 
@@ -56,13 +58,14 @@ public class IPTrafNg extends Job {
             CallIPTraf();
             Logger.debug("traffic...");
         } catch (IOException ignored) {
-            Logger.error(ignored,"failed to collect traffic data");
+            Logger.error(ignored, "failed to collect traffic data");
         }
     }
 
 
     /**
      * sends a a list of PacketObjects to the elastic search DB as json
+     *
      * @param ob
      */
     private void sendList(ArrayList<PacketObject> ob) {
@@ -70,19 +73,42 @@ public class IPTrafNg extends Job {
                 .setFieldNamingStrategy(new atFieldNamingStrategy())
                 .create();
         String finish = gs.toJson(new CollectionJson(gs.toJson(ob)));
-        sendToElastic(finish,"iptraf");
+        sendToElastic(finish, "iptraf");
+    }
+
+
+    /**
+     * sends a a list of PacketObjects to the elastic search DB as json
+     *
+     * @param ob
+     */
+    private void sendBulk(ArrayList<PacketObject> ob) {
+        String jTemp =
+                "{ \"update\" : {\"_id\" : \"3\", \"_type\" : \"doc\", \"_index\" : \"tupeles\"} }\n" +
+                        "{ \"doc\" : {\"field2\" : \"value2\"} }\n\n";
+        Gson gs = new GsonBuilder()
+                .setFieldNamingStrategy(new atFieldNamingStrategy())
+                .create();
+
+        for (PacketObject o : ob) {
+            jTemp = "{ \"update\" : {\"_id\" : \"1\", \"_type\" : \" " + o.getReceiver() + " \", \"_index\" : \" " + config.indexName + "} }  \n\n";
+            jTemp = jTemp + gs.toJson(o)+ "\n";
+        }
+
+        sendToElasticBulk(jTemp, "iptraf");
     }
 
     /**
      * sends a single  PacketObject to the elastic search DB as json
+     *
      * @param ob
      */
-    public  void sendIPEntity(PacketObject ob) {
+    public void sendIPEntity(PacketObject ob) {
         Gson gs = new GsonBuilder()
                 .setFieldNamingStrategy(new atFieldNamingStrategy())
                 .create();
         String jString = gs.toJson(ob);
-        sendToElastic(jString,"iptraf");
+        sendToElasticBulk(jString, "iptraf");
     }
 
 
