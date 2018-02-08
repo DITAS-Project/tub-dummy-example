@@ -18,4 +18,6 @@ RUN apt-get update \
     && apt-get install -y iptraf-ng \
     && rm -rf /var/lib/apt/lists/*
 
+RUN chmod +x /opt/vdc/vdc-agent
+
 CMD ["sh","run.sh"]
