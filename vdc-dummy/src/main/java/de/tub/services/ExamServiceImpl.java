@@ -45,7 +45,7 @@ public class ExamServiceImpl implements ExamService{
     final PreparedStatement listAll;
     final PreparedStatement listAllBySSN;
 
-    private final PreparedStatement serach;
+    private final PreparedStatement search;
     private final PreparedStatement openBegin;
     private final PreparedStatement openEnd;
     private final PreparedStatement filterBySSN;
@@ -64,7 +64,7 @@ public class ExamServiceImpl implements ExamService{
 
         listAll = session.prepare("Select * from exams");
         listAllBySSN =  session.prepare("Select * from exams where ssn = ?");
-        serach =  session.prepare("Select * from exams where ssn in ? and date > ? and date < ?");
+        search =  session.prepare("Select * from exams where ssn in ? and date > ? and date < ?");
         openEnd =  session.prepare("Select * from exams where ssn in ? and date > ?");
         openBegin =  session.prepare("Select * from exams where ssn in ? and date < ?");
         filterBySSN = session.prepare("Select * from exams where ssn in ?");
@@ -72,7 +72,7 @@ public class ExamServiceImpl implements ExamService{
 
     @Override
     public Iterable<Exam> listAllExams() {
-        return helper.wrapCall(()-> map(session.execute(instrumentTracing(listAll.bind()))));
+        return helper.wrapCall(()-> map(execWithTrace(listAll.bind())));
     }
 
     private Iterable<Exam> map(ResultSet set){
@@ -96,39 +96,48 @@ public class ExamServiceImpl implements ExamService{
     }
 
     private Iterable<Exam> filterBySSN(LinkedList<Integer> ssns) {
-        return map(session.execute(instrumentTracing(filterBySSN.bind(ssns))));
+        return map(execWithTrace(filterBySSN.bind(ssns)));
     }
 
     private Iterable<Exam> serach(LocalDate start, LocalDate end, LinkedList<Integer> ssns) {
-        return map(session.execute(instrumentTracing(serach.bind(ssns, start.toDate(), end.toDate()))));
+        return map(execWithTrace(search.bind(ssns, start.toDate(), end.toDate())));
     }
 
     private Iterable<Exam> openBegin(LinkedList<Integer> ssns, LocalDate end) {
-        return map(session.execute(instrumentTracing(openBegin.bind(ssns, end.toDate()))));
+        return map(execWithTrace(openBegin.bind(ssns, end.toDate())));
     }
 
     private Iterable<Exam> openEnd(LinkedList<Integer> ssns, LocalDate start) {
-        return map(session.execute(instrumentTracing(openEnd.bind(ssns, start.toDate()))));
+        return map(execWithTrace(openEnd.bind(ssns, start.toDate())));
     }
 
     @Override
     public Iterable<Exam> getExamBySSN(Long ssn) {
-        return helper.wrapCall(()-> map(session.execute(instrumentTracing(listAllBySSN.bind(ssn.intValue())))),"getExamsBySSN");
+        return helper.wrapCall(()-> map(execWithTrace(listAllBySSN.bind(ssn.intValue()))),"getExamsBySSN");
     }
 
     @Override
     public Iterable<Exam> getExamBy(Long ssn, String type) {
-        return helper.wrapCall(()-> map(session.execute(instrumentTracing(listAllBySSN.bind(ssn.intValue())))),"getExamBy");
+        return helper.wrapCall(()-> map(execWithTrace(listAllBySSN.bind(ssn.intValue()))),"getExamBy");
     }
 
-    private Statement instrumentTracing(BoundStatement statement){
+    private ResultSet execWithTrace(Statement statement){
         Trace trace = Trace.extractFromThread();
         if(trace != null) {
             trace = trace.ChildOf("cassandra");
             helper.push(trace);
             statement.setOutgoingPayload(Collections.singletonMap("zipkin", trace.toBuffer()));
-            return statement.enableTracing();
+            ResultSet resultSet = exec(statement.enableTracing());
+            helper.finish(trace);
+            return resultSet;
         }
-        return statement;
+        return exec(statement);
     }
+    
+    private ResultSet exec(Statement statement){
+        return session.execute(statement);
+    }
+    
+    
+    
 }
