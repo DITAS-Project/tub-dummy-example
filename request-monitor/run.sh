@@ -1,6 +1,6 @@
 #!/bin/bash 
 echo "starting monitoring proxy for ${VDC_NAME}"
-
+sleep 10
 # create an ingest node in the ES to map the logdata send by filebeat
 curl -H 'Content-Type: application/json' -XPUT 'http://elasticsearch:9200/_ingest/pipeline/nginx-pipeline' -d@pipeline.json
 
