@@ -37,8 +37,6 @@ public abstract class Job implements Runnable{
         try {
             HttpResponse<JsonNode> jResponse = request.asJson();
             Logger.debug("send "+type+" data got"+jResponse.getStatus() );
-            System.out.println(jResponse.getBody());
-            System.out.println(payload);
         } catch (UnirestException e) {
             Logger.error(e,"could not send "+type+" data");
         }

@@ -4,7 +4,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 public class CollectionJson {
-    private DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
+    private transient DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
 
     private String timestamp;
     private String throughput;

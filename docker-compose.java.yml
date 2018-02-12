@@ -35,6 +35,7 @@ services:
        - mysql
     ports:
       - 8484:8484
+      - 8080:8080
     environment:
       - "elasticURI=elasticsearch:9200"
   request-monitor:

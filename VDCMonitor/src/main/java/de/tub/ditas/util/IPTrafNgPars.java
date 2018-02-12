@@ -106,7 +106,7 @@ public class IPTrafNgPars {
      * @return
      */
     public static ArrayList<PacketObject> reduceHelper(ArrayList<PacketObject> objects) {
-        objects.add(new PacketObject(null, null, 0, null, null));
+        objects.add(new PacketObject( null, 0, null, null));
         ArrayList<PacketObject> build = new ArrayList<>();
         PacketObject temp;
         for (int i = 0; i < objects.size() - 1; i++) {
@@ -129,7 +129,7 @@ public class IPTrafNgPars {
      * @return
      */
     public ArrayList<PacketObject> reduceWhitelist(ArrayList<PacketObject> objects) throws NullPointerException {
-        if (whitelist.isEmpty()) {
+        if (!whitelist.isEmpty()) {
             ArrayList<PacketObject> temp = new ArrayList<>();
             for (PacketObject x : objects) {
                 for (WhitelistObject y : whitelist) {
@@ -148,7 +148,6 @@ public class IPTrafNgPars {
             return temp;
         }
             return objects;
-
     }
 
 
@@ -164,7 +163,7 @@ public class IPTrafNgPars {
         String receiver = temp[4];
         String[] tempBytes = line[3].split(" ");
         int bytes = Integer.parseInt(tempBytes[1]);
-        return new PacketObject(line[1], line[0], bytes, sender, receiver);
+        return new PacketObject(line[0], bytes, sender, receiver);
     }
 
     public ArrayList<WhitelistObject> getWhitelist() {
