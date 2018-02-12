@@ -2,17 +2,11 @@ package de.tub.ditas.job;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.mashape.unirest.request.HttpRequestWithBody;
-import de.tub.ditas.util.IPTrafNgPars;
+import de.tub.ditas.util.*;
 import de.tub.ditas.Job;
 import de.tub.ditas.MonitorConfig;
-import de.tub.ditas.util.CollectionJson;
-import de.tub.ditas.util.PacketObject;
-import de.tub.ditas.util.atFieldNamingStrategy;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.pmw.tinylog.Logger;
 
 import java.io.File;
@@ -26,6 +20,8 @@ public class IPTrafNg extends Job {
 
     private static final String COMMAND = "iptraf-ng";
     static String inter = "all";
+    private transient DateTimeFormatter dateParser = ISODateTimeFormat.dateTimeNoMillis();
+
 
     public IPTrafNg(MonitorConfig config) {
         super(config);
@@ -34,6 +30,7 @@ public class IPTrafNg extends Job {
     /**
      * Calls a commandline tool to measure traffic and uses de.tub.ditas.util.IPTrafNgPars to parse the data
      * Then it sends the measure data to the elasticseach DB
+     *
      * @throws IOException
      */
     private void CallIPTraf() throws IOException {
@@ -43,10 +40,11 @@ public class IPTrafNg extends Job {
         while (process.isAlive()) {
             try {
                 Thread.sleep(500);
-            } catch (InterruptedException ignored) { }
+            } catch (InterruptedException ignored) {
+            }
         }
         ArrayList<PacketObject> ipObjects = IPTrafNgPars.getInstance().readFile(logFilePath);
-        sendList(ipObjects);
+        sendBulk(ipObjects);
         new File(logFilePath).delete();
     }
 
@@ -56,34 +54,26 @@ public class IPTrafNg extends Job {
             CallIPTraf();
             Logger.debug("traffic...");
         } catch (IOException ignored) {
-            Logger.error(ignored,"failed to collect traffic data");
+            Logger.error(ignored, "failed to collect traffic data");
         }
     }
 
-
     /**
      * sends a a list of PacketObjects to the elastic search DB as json
+     *
      * @param ob
      */
-    private void sendList(ArrayList<PacketObject> ob) {
+    private void sendBulk(ArrayList<PacketObject> ob) {
+        //testBulk(ob);
         Gson gs = new GsonBuilder()
                 .setFieldNamingStrategy(new atFieldNamingStrategy())
                 .create();
-        String finish = gs.toJson(new CollectionJson(gs.toJson(ob)));
-        sendToElastic(finish,"iptraf");
+        String jTemp = "";
+        for (PacketObject o : ob) {
+            IPPacketObject temp = new IPPacketObject(o.getDate(), o.getBytes(), o.getSender(), o.getReceiver());
+            jTemp = jTemp + "{ \"create\" : { \"_index\" : \"" + config.indexName + "\", \"_type\" : \"" + temp.getComponent() + "\", \"_id\" : \"" + Integer.toHexString(Calendar.getInstance().hashCode()) + "\" } }\n";
+            jTemp = jTemp + gs.toJson(temp) + "\n";
+        }
+        sendToElasticBulk(jTemp, "iptraf");
     }
-
-    /**
-     * sends a single  PacketObject to the elastic search DB as json
-     * @param ob
-     */
-    public  void sendIPEntity(PacketObject ob) {
-        Gson gs = new GsonBuilder()
-                .setFieldNamingStrategy(new atFieldNamingStrategy())
-                .create();
-        String jString = gs.toJson(ob);
-        sendToElastic(jString,"iptraf");
-    }
-
-
 }

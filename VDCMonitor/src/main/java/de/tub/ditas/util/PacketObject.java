@@ -13,7 +13,7 @@ public class PacketObject {
     private String timestamp = dateParser.print(System.currentTimeMillis());
 
 
-    public PacketObject(String protocol, String date, int bytes , String sender, String receiver){
+    public PacketObject(String date, int bytes , String sender, String receiver){
         this.date= date;
         this.bytes = bytes;
         this.sender= sender;
