@@ -7,9 +7,28 @@ This example represents a snapshot of an already deployed VDC with two attached 
 
 ![Architecture Image](https://raw.githubusercontent.com/DITAS-Project/tub-dummy-example/master/Architecture.png)
 ### Usage:
-use ```docker-compose -f docker-compose.java.yml up ``` to start the vdc and its databases.
+All components can be build and run via docker-compose. The current version was tested on Windows and OSX with Docker version 17.12 and docker-compose version 1.18.0.
+Currently there are four different compose files:
+* ```docker-compose.demo.yml```- starting 8 containers with a Java implementation of the VDC (containers: mysql, cassandra, elasticsearch, vdc, dockbeat, request-monitor, zipkin, kibana)
+* ```docker-compose.yml```- starting 7 containers with a Node-Red implementation of the VDC (containers: mysql, cassandra, elasticsearch, vdc, dockbeat, request-monitor, zipkin)
+* ```docker-compose.java.yml```- starting 6 containers with a Java implementation of the VDC (containers: mysql, cassandra, elasticsearch, vdc, request-monitor, zipkin)
+* ```docker-compose.dev.yml```- starting 5 containers with no implementation of the VDC (containers: mysql, cassandra, elasticsearch, request-monitor, zipkin)
 
-use ```docker-compose up ``` to start the node-red vdc and its databases.
+To start the containers for the above choosen scenario use the following command: 
+
+```docker-compose -f <YOUR-COMPOSE-FILE-TO-CHOOSE> up ``` 
+
+i.e. for the demo scenario: ```docker-compose -f docker-compose.demo.yml up ```
+
+This will also build the necessary parts for the containers before starting them. 
+
+#####UPDATE
+If you want to update the sources from github:
+ - stop the containers first (Ctrl + C)
+ - pull the new sources from github (```git pull``)
+ - remove the containers (```docker-compose rm```)
+ - rebuild and start the containers (```docker-compose -f <YOUR-COMPOSE-FILE-TO-CHOOSE> up --build``)
+
 ### Available Components:
 * VDC /vdc
     * MySQL Database with dummy data
