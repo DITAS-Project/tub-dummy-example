@@ -22,7 +22,7 @@ i.e. for the demo scenario: ```docker-compose -f docker-compose.demo.yml up ```
 
 This will also build the necessary parts for the containers before starting them. 
 
-#####UPDATE
+###UPDATE
 If you want to update the sources from github:
  - stop the containers first (Ctrl + C)
  - pull the new sources from github (```git pull``)
