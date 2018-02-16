@@ -26,7 +26,8 @@ or higher, and docker compose version:
 ```
 $docker-compose.exe --version
 docker-compose version 1.18.0, build 8dd22a96
-``` or higher.
+``` 
+or higher.
 
 ### Running the Example:
 To start the containers for the above choosen scenario use the following command: 
