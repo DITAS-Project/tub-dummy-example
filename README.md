@@ -14,6 +14,21 @@ Currently there are four different compose files:
 * ```docker-compose.java.yml```- starting 6 containers with a Java implementation of the VDC (containers: mysql, cassandra, elasticsearch, vdc, request-monitor, zipkin)
 * ```docker-compose.dev.yml```- starting 5 containers with no implementation of the VDC (containers: mysql, cassandra, elasticsearch, request-monitor, zipkin)
 
+### System Requirmentes:
+In order to run our example your docker enviroment needs to have at least 6 GB of system memory. If you are running Docker for OSX or Windows, make sure to change the setting of the docker vm, otherwise some containers might not start or terminate unexpectily. 
+
+We recommend using docker version:
+```
+$docker --version
+Docker version 17.12.0-ce, build c97c6d6
+``` 
+or higher, and docker compose version:
+```
+$docker-compose.exe --version
+docker-compose version 1.18.0, build 8dd22a96
+``` or higher.
+
+### Running the Example:
 To start the containers for the above choosen scenario use the following command: 
 
 ```docker-compose -f <YOUR-COMPOSE-FILE-TO-CHOOSE> up ``` 
