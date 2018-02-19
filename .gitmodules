@@ -1,3 +1,6 @@
 [submodule "Cassandra"]
 	path = Cassandra
 	url = https://github.com/DITAS-Project/Cassandra-OpenTracing
+[submodule "VDCMonitor"]
+	path = VDCMonitor
+	url = https://github.com/DITAS-Project/VDC-Throughput-Agent
