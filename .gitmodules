@@ -7,3 +7,6 @@
 [submodule "vdc-agent"]
 	path = vdc-agent
 	url = https://github.com/DITAS-Project/VDC-Logging-Agent
+[submodule "request-monitor"]
+	path = request-monitor
+	url = https://github.com/DITAS-Project/VDC-Request-Monitor
