@@ -1,1 +1,0 @@
-docker run --rm -it -v "$($Env:GoPath):/gopath" -v "$($pwd.Path):/app" -v "$($pwd.Path)/vendor:/vendor/src" -e "GOPATH=/gopath:/vendor" -w /app golang:1.8.3 sh -c 'CGO_ENABLED=0 go build -a --installsuffix cgo --ldflags="-s" -o vdc-agent'
