@@ -1,0 +1,3 @@
+[submodule "Cassandra"]
+	path = Cassandra
+	url = https://github.com/DITAS-Project/Cassandra-OpenTracing
