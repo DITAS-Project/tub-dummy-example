@@ -8,11 +8,10 @@ This example represents a snapshot of an already deployed VDC with two attached 
 ![Architecture Image](https://raw.githubusercontent.com/DITAS-Project/tub-dummy-example/master/Architecture.png)
 ### Usage:
 All components can be build and run via docker-compose. The current version was tested on Windows and OSX with Docker version 17.12 and docker-compose version 1.18.0.
-Currently there are four different compose files:
+Currently there are three different compose files:
 * ```docker-compose.demo.yml```- starting 8 containers with a Java implementation of the VDC (containers: mysql, cassandra, elasticsearch, vdc, dockbeat, request-monitor, zipkin, kibana)
 * ```docker-compose.yml```- starting 7 containers with a Node-Red implementation of the VDC (containers: mysql, cassandra, elasticsearch, vdc, dockbeat, request-monitor, zipkin)
 * ```docker-compose.java.yml```- starting 6 containers with a Java implementation of the VDC (containers: mysql, cassandra, elasticsearch, vdc, request-monitor, zipkin)
-* ```docker-compose.dev.yml```- starting 5 containers with no implementation of the VDC (containers: mysql, cassandra, elasticsearch, request-monitor, zipkin)
 
 ### System Requirmentes:
 In order to run our example your docker enviroment needs to have at least 6 GB of system memory. If you are running Docker for OSX or Windows, make sure to change the setting of the docker vm, otherwise some containers might not start or terminate unexpectily. 
