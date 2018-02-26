@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
-  description: ''
+  description: 'swagger file for the example Java Implementation of the VDC for the E-Health Use Case'
   version: 1.0.0
-  title: OSR VDC
+  title: OSR VDC - Java
   termsOfService: 'http://swagger.io/terms/'
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
         format: int32
     get:
       description: returns all the details of the patient
-      summary: ''
+      summary: 'details can be {SSN, lastName, name, gender, mail, birthday}'
       produces:
         - application/json
       responses:
@@ -42,7 +42,7 @@ paths:
         format: int32
     get:
       description: returns the last exams for a specific patient
-      summary: ''
+      summary: 'return consists of exam parameter, like {SSN, lastName, name, cholesterol, triglyceride, hepatitis}'
       parameters:
         - name: SSN
           in: path
@@ -69,7 +69,7 @@ paths:
         format: int64
     get:
       description: 'returns the last exams for a specific patient and test '
-      summary: ''
+      summary: 'return consists of exam parameter, like {SSN, lastName, name, cholesterol, triglyceride, hepatitis}'
       parameters:
         - name: test
           in: path
@@ -92,7 +92,7 @@ paths:
   /find:
     get:
       description: 'returns the last exams for a specific patient and test '
-      summary: ''
+      summary: 'return consists of exam parameter, like {SSN, lastName, name, date, cholesterol, triglyceride, hepatitis}'
       parameters:
         - name: minage
           in: query
@@ -102,16 +102,17 @@ paths:
           minimum: 0
         - name: maxage
           in: query
-          description: 'maximal age '
+          description: 'maximal age'
           type: integer
           format: int32
           minimum: 0
         - name: gender
           in: query
+          description: "'m' = male or 'f' = female"
           type: string
           enum:
-            - male
-            - female
+            - m
+            - f
         - name: type
           in: query
           description: name of the test to return
@@ -120,14 +121,6 @@ paths:
             - cholesterol
             - triglyceride
             - hepatitis
-        - name: startDate
-          in: query
-          type: string
-          format: date
-        - name: endDate
-          in: query
-          type: string
-          format: date
       responses:
         '200':
           description: successful operation

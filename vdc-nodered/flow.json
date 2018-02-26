@@ -136,6 +136,8 @@
         "wires": []
     },
     {
+        "id": "e7254f63.f2e348",
+        "type": "function",
         "z": "5f08c6b7.a687b8",
         "name": "extractTrace",
         "func": "var traceid = msg.req.headers['x-b3-traceid']\nvar spanid =  msg.req.headers['x-b3-spanid']\nvar sampled = msg.req.headers['x-b3-sampled']\nvar parentspanid = msg.req.headers['x-b3-parentspanid']\n\nif (sampled === \"1\") {\n    msg.payload = {\n        traceid:traceid,\n        spanid:(Math.random()*0xFFFFFFFFFFFFFF<<0).toString(16),\n        parentspanid:spanid,\n        operation:\"nodered\",\n    }\n}\nmsg.topic = \"trace\"\nreturn msg",
