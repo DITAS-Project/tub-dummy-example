@@ -67,3 +67,4 @@ gradle*
 *.iml
 app/bin/
 app/.project
+Dockerfile_base

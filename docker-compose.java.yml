@@ -33,27 +33,17 @@ services:
     depends_on:
        - cassandra
        - mysql
+       - elasticsearch
+       - zipkin
     ports:
       - 8484:8484
       - 8080:8080
+      - 8000:8000
     environment:
       - "elasticURI=elasticsearch:9200"
-  request-monitor:
-    build:
-      context: ./request-monitor/
-    ports:
-      - 8000:8000
-    links:
-      - vdc:vdc
-      - elasticsearch:elasticsearch
-      - zipkin:zipkin
-    depends_on:
-      - vdc
-      - elasticsearch
-      - zipkin
-    environment:
       - "VDC_NAME=osrvdc"
       - "OPENTRACING=on"
+ 
   zipkin:
     image: openzipkin/zipkin
     ports:
