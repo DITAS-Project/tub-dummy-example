@@ -11,8 +11,7 @@ services:
     image: ditas/tub_example_cassandra
 
   vdc:
-    build:
-       context: ./vdc-dummy/
+    image: ditas/tub_example_vdc_dummy
     links:
        - cassandra:cassandra
        - mysql:mysql
