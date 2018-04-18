@@ -1,19 +1,23 @@
 version: '3'
 services:
   mysql:
-    image: mysql
+    build:
+      context: ./MySQL/build
     environment:
       MYSQL_ROOT_PASSWORD: "0der1@b)Opd0Sis0nobxuS[uhId"
       MYSQL_DATABASE: "DITAS"
-    volumes:
-      - ./MySQL/data/patient.sql:/docker-entrypoint-initdb.d/patient.sql
+    ports:
+      - 6603:3306
   cassandra:
     build:
       context: ./Cassandra/build
-    volumes:
-      - ./Cassandra/data/exams.sql:/docker-entrypoint-initdb.d/exams.cql
     links:
       - zipkin:zipkin
+    ports:
+      - 7000:7000
+      - 7001:7001
+      - 9042:9042
+      - 9160:9160
   elasticsearch:
     image: elasticsearch
     ports:
