@@ -61,7 +61,6 @@ gradle-app.setting
 hs_err_pid*
 
 .idea
-build/
 gradle*
 *.iml
 app/bin/
