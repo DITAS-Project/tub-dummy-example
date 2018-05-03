@@ -6,10 +6,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "0der1@b)Opd0Sis0nobxuS[uhId"
       MYSQL_DATABASE: "DITAS"
-
+    ports:
+      - 3306:3306
   cassandra:
     image: ditas/tub_example_cassandra
-
+    ports:
+      - 9042:9042
+      - 9160:9160
   vdc:
     image: ditas/tub_example_vdc_dummy
     links:

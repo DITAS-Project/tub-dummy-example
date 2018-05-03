@@ -1,4 +1,4 @@
-FROM ditas/vdc_base_image:latest
+FROM ditas/vdc-base-image
 WORKDIR /opt/vdc
 
 RUN  apt-get update &&  apt-get install -y maven openjdk-8-jdk

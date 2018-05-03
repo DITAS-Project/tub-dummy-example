@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: vdc
+  name: vdc
+  namespace: tub-example
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: vdc
+    spec:
+      containers:
+      - env:
+        - name: OPENTRACING
+          value: "off"
+        - name: VDC_ADDRESS
+          value: localhost
+        - name: VDC_NAME
+          value: "tubvdc"
+        - name: VDC_PORT
+          value: "8080"
+        - name: elasticURI
+          value: "130.149.158.233:9200"
+        image: ditas/tub_example_vdc_dummy:v01
+        name: vdc
+        ports:
+        - containerPort: 8484
+        - containerPort: 8080
+        - containerPort: 8000
+        resources: {}
+      restartPolicy: Always
+status: {}

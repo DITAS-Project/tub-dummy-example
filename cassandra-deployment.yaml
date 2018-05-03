@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: cassandra
+  name: cassandra
+  namespace: tub-example
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: cassandra
+    spec:
+      containers:
+      - image: ditas/tub_example_cassandra
+        name: cassandra
+        ports:
+        - containerPort: 9042
+        - containerPort: 9160
+        resources: {}
+      restartPolicy: Always
+status: {}

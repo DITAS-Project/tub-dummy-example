@@ -58,8 +58,8 @@ public class Server implements CommandLineRunner {
                     String pass = ctx.getEnvironment().getProperty("spring.datasource.password");
 
                     System.out.println("wait for databases to settle");
-                    waitUntilReachable(cassandraURI);
-                    waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
+                    //waitUntilReachable(cassandraURI);
+                    //waitUntilReachable(databaseURI.substring("jdbc:mysql://".length(),databaseURI.lastIndexOf(':')));
 
                     waitForCassandra(cassandraURI);
                     waitForMySQL(databaseURI,user,pass);
@@ -134,6 +134,7 @@ public class Server implements CommandLineRunner {
             return true;
         } catch (IOException e) {
             System.out.println("failed to wait for "+uri);
+            e.printStackTrace();
             return false;
         }
     }
