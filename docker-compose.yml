@@ -1,6 +1,11 @@
 version: '3'
 services:
-
+  elasticserach:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+    ports:
+      - 9200:9200
+    environment: 
+      - "discovery.type=single-node"
   mysql:
     image: ditas/tub_example_mysql
     environment:
@@ -19,16 +24,17 @@ services:
        - cassandra:cassandra
        - mysql:mysql
     depends_on:
+       - elasticserach
        - cassandra
        - mysql
     ports:
       - 8484:8484
       - 8080:8080
-      - 8000:8000
+      - 8000:80
     environment:
-      - "VDC_ADDRESS=localhost"
+      - "vdcURI=localhost:8080"
       - "VDC_PORT=8080"
-      - "elasticURI=elasticsearch:9200" #Needes to be supllyed by the enviroment
+      - "elasticURI=elasticserach:9200" #Needes to be supllyed by the enviroment
       - "VDC_NAME=$VDC_NAME" #Needes to be supllyed by the enviroment
       - "OPENTRACING=off"
  
