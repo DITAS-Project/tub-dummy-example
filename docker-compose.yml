@@ -19,7 +19,9 @@ services:
       - 9042:9042
       - 9160:9160
   vdc:
-    image: ditas/tub_example_vdc_dummy
+    #image: ditas/tub_example_vdc_dummy
+    build: 
+      context: ./vdc-dummy/
     links:
        - cassandra:cassandra
        - mysql:mysql
@@ -34,7 +36,7 @@ services:
     environment:
       - "vdcURI=localhost:8080"
       - "VDC_PORT=8080"
-      - "elasticURI=elasticserach:9200" #Needes to be supllyed by the enviroment
+      - "elasticURI=elasticserach" #Needes to be supllyed by the enviroment
       - "VDC_NAME=$VDC_NAME" #Needes to be supllyed by the enviroment
       - "OPENTRACING=off"
  
