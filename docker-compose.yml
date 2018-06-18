@@ -32,10 +32,6 @@ services:
       - 8484:8484
       - 8080:8080
       - 8000:80
-    environment:
-      - "vdcURI=localhost:8080"
-      - "VDC_PORT=8080"
-      - "elasticURI=elasticserach" #Needes to be supllyed by the enviroment
-      - "VDC_NAME=$VDC_NAME" #Needes to be supllyed by the enviroment
-      - "OPENTRACING=off"
+    volumes: 
+      - .config:/.config/:ro
  

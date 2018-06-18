@@ -1,0 +1,8 @@
+{
+    "Endpoint":"http://127.0.0.1:8080",
+    "ElasticSearchURL":"http://elasticserach:9200",
+    "VDCName":"tubvdc",
+    "Opentracing":false,
+    "UseSelfSigned":true,
+    "ForwardTraffic":false
+}
