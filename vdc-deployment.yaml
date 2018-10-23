@@ -1,14 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.12.0 (0ab07be)
   creationTimestamp: null
   labels:
     io.kompose.service: vdc
   name: vdc
-  namespace: tub-example
 spec:
   replicas: 1
-  strategy: {}
+  strategy:
+    type: Recreate
   template:
     metadata:
       creationTimestamp: null
@@ -16,23 +19,17 @@ spec:
         io.kompose.service: vdc
     spec:
       containers:
-      - env:
-        - name: OPENTRACING
-          value: "off"
-        - name: VDC_ADDRESS
-          value: localhost
-        - name: VDC_NAME
-          value: "tubvdc"
-        - name: VDC_PORT
-          value: "8080"
-        - name: elasticURI
-          value: "130.149.158.233:9200"
-        image: ditas/tub_example_vdc_dummy:v01
+      - image: vdc
         name: vdc
-        ports:
-        - containerPort: 8484
-        - containerPort: 8080
-        - containerPort: 8000
         resources: {}
+        volumeMounts:
+        - mountPath: /.config/
+          name: vdc-claim0
+          readOnly: true
       restartPolicy: Always
+      volumes:
+      - name: vdc-claim0
+        persistentVolumeClaim:
+          claimName: vdc-claim0
+          readOnly: true
 status: {}

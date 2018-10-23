@@ -1,40 +1,40 @@
-FROM ditas/vdc-base-image
-WORKDIR /opt/vdc
+FROM golang:1.10.1-alpine AS vdc-traffic
+RUN apk update && apk add git && \
+    go get -u github.com/golang/dep/cmd/dep && \
+    go get github.com/DITAS-Project/VDC-Throughput-Agent && \
+    cd src/github.com/DITAS-Project/VDC-Throughput-Agent && \
+    dep ensure && \
+    CGO_ENABLED=0 go build -a --installsuffix cgo --ldflags="-s" -o vdc-traffic
 
-ENV MAVEN_VERSION 3.5.2
-ENV MAVEN_HOME /usr/lib/mvn
-ENV PATH $MAVEN_HOME/bin:$PATH
+FROM golang:1.10.1 AS build
+ENV SOURCEDIR=/go/src/github.com/DITAS-Project/VDC-DUMMY
+RUN mkdir -p ${SOURCEDIR}
+WORKDIR ${SOURCEDIR}
+COPY . .
+RUN CGO_ENABLED=0 go build -a --installsuffix cgo --ldflags="-s" -o dummy
 
-ENV LANG C.UTF-8
+FROM alpine:3.8
 
-RUN { \
-		echo '#!/bin/sh'; \
-		echo 'set -e'; \
-		echo; \
-		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
-	} > /usr/local/bin/docker-java-home \
-	&& chmod +x /usr/local/bin/docker-java-home
-ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
-ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
+COPY --from=vdc-traffic /go/src/github.com/DITAS-Project/VDC-Throughput-Agent/vdc-traffic /opt/monitoring/vdc-traffic
 
-ENV JAVA_VERSION 8u111
-ENV JAVA_ALPINE_VERSION 8.111.14-r0
+COPY --from=build /go/src/github.com/DITAS-Project/VDC-DUMMY/dummy /opt/dummy
 
-RUN set -x \
-	&& apk add --no-cache \
-		openjdk8="$JAVA_ALPINE_VERSION" \
-&& [ "$JAVA_HOME" = "$(docker-java-home)" ]
+ENV BUILD_DEPS="gettext alpine-sdk git autoconf automake libtool"  \
+    RUNTIME_DEPS="libintl libpcap-dev ncurses-dev "
 
-RUN wget http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
-  tar -zxvf apache-maven-$MAVEN_VERSION-bin.tar.gz && \
-  rm apache-maven-$MAVEN_VERSION-bin.tar.gz && \
-  mv apache-maven-$MAVEN_VERSION /usr/lib/mvn
+# add nassesary command line tools
+RUN  apk add --update $RUNTIME_DEPS && \
+    apk add --virtual build_deps $BUILD_DEPS   \
+    && cd /tmp && git clone https://github.com/dleonard0/pktstat.git \
+        && cd pktstat \
+        && libtoolize --force &&  aclocal && autoheader && automake --force-missing --add-missing && autoconf && ./configure \
+        && make install && cd ../ rm -rf pktstat \
+        && cp /usr/bin/envsubst /usr/local/bin/envsubst  \
+    && apk del build_deps \
+    && rm -rf /var/cache/apk/*
 
-ADD ./src /opt/vdc/src
-ADD ./pom.xml /opt/vdc/pom.xml
-ADD ./deploy/application.properties /opt/vdc/src/main/resources/application.properties
-RUN mvn install compile
+COPY run.sh /run.sh
 
-EXPOSE 8080
-ENV WORKINGDIR=/opt/vdc
-CMD ["mvn","spring-boot:run"]
+EXPOSE 80
+
+CMD [ "sh","/run.sh" ]

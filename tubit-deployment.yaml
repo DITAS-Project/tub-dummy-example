@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: tubit
+  labels:
+    selector.key: tubit
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: elasticserach
+    spec:
+      containers:
+      - name: request-monitor
+        image: ditas/vdc-request-monitor:latest
+        ports:
+          - containerPort: 80
+          - containerPort: 443
+        resources: {}
+        volumeMounts:
+          - mountPath: /.config/
+            name: vdc-config
+            readOnly: true
+      - name: logging-agent
+        image: ditas/vdc-logging-agent:latest
+        resources: {}
+        volumeMounts:
+          - mountPath: /.config/
+            name: vdc-config
+            readOnly: true
+      - name: vdc
+        image: ditas/tub_example_vdc_dummy:echo
+        resources: {}
+        volumeMounts:
+          - mountPath: /.config/
+            name: vdc-config
+            readOnly: true
+      volumes:
+        - name: vdc-config
+          persistentVolumeClaim:
+            claimName: vdc-config
+            readOnly: true
+status: {}
