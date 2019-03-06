@@ -1,0 +1,7 @@
+{
+    "Port":8484, 
+    "ElasticSearchURL":"http://elasticsearch:9200",
+    "VDCName":"tub-mock-vdc",
+    "Endpoint":"http://vdc:8080",
+    "verbose":true
+}

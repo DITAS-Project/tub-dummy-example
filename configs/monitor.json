@@ -1,0 +1,8 @@
+{
+    "ElasticSearchURL":"http://elasticsearch:9200",
+    "VDCName":"tub-mock-vdc",
+    "Endpoint":"http://vdc:8080",
+    "UseSelfSigned":true,
+    "ForwardTraffic":false,
+    "verbose":true
+}

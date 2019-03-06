@@ -1,7 +1,0 @@
-{
-    "Port":8484,
-    "ElasticSearchURL":"http://elasticserach:9200",
-    "VDCName":"tubvdc",
-    "Endpoint":"http://vdc-dummy:8080",
-    "verbose":true
-}
