@@ -1,0 +1,24 @@
+{
+  "url": "http://0.0.0.0:8080/auth",
+  "password": "$KEYCLOAK_PASSWORD",
+  "roles": [
+    "tester"
+  ],
+  "users": [
+    {
+      "username": "test",
+      "realmRoles": [
+        "tester"
+      ],
+      "password": "123456"
+    },
+    {
+      "username": "service",
+      "relamRoles": [
+        "serviceAccount"
+      ],
+      "password": "123245678"
+    }
+  ],
+  "registrationAllowed": true
+}

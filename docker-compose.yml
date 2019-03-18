@@ -39,5 +39,9 @@ services:
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     command: "-Elogger.level=ERROR"
-
-  
+  keycloak:
+    image: ditas/keycloak
+    ports:
+      - "4444:8080"
+    volumes:
+      - "./configs/keyclocak.json:/opt/jboss/ditas/Keyclocak.json.tmp"
