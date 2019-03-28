@@ -4,5 +4,8 @@
     "Endpoint":"http://vdc:8080",
     "UseSelfSigned":true,
     "ForwardTraffic":false,
-    "verbose":true
+    "verbose":true,
+    "USEIAM":true,
+    "IAMURL":"http://keycloak:8080",
+    "JWKSURL":"http://keycloak:8080/auth/realms/vdc_access/protocol/openid-connect/certs"
 }
