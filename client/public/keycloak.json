@@ -1,0 +1,8 @@
+{
+  "realm": "vdc_access",
+  "auth-server-url": "http://localhost:4444/auth",
+  "ssl-required": "external",
+  "resource": "vdc_client",
+  "public-client": true,
+  "confidential-port": 0
+}
