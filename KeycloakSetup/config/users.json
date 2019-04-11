@@ -1,0 +1,9 @@
+{
+    "relamRoles": [
+      "tester",
+      "service"
+    ],
+    "users": [
+      {"username": "test","password": "123456","realmRoles": ["tester"]}
+    ]
+  }

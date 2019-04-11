@@ -1,5 +1,13 @@
 version: '3'
 services:
+  kcc:
+    build:
+      context: ./KeycloakSetup
+      dockerfile: Dockerfile
+    links:
+     - keycloak:keycloak
+    depends_on:
+     - keycloak
   vdc:
     image: ditas/tub-mock-vdc
     ports:
@@ -40,8 +48,10 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     command: "-Elogger.level=ERROR"
   keycloak:
-    image: ditas/keycloak
+    image: ditas/keycloak:production
+    environment:
+     - "KEYCLOAK_PASSWORD=UVhDKCuoQGMAMNAEBWH2gkU0JJR8DnXT"
     ports:
       - "4444:8080"
-    volumes:
-      - "./configs/keyclocak.json:/opt/jboss/ditas/Keyclocak.json.tmp"
+      - "4040:8443"
+      - "4000:8000"
