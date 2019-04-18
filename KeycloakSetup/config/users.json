@@ -1,5 +1,6 @@
 {
-    "relamRoles": [
+    "blueprintid":"vdc_access",
+    "roles": [
       "tester",
       "service"
     ],
