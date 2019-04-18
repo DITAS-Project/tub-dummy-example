@@ -1,0 +1,6 @@
+[submodule "vdc"]
+	path = vdc
+	url = https://github.com/DITAS-Project/tub-mock-vdc
+[submodule "dal"]
+	path = dal
+	url = https://github.com/DITAS-Project/tub-mock-dal

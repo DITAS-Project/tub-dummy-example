@@ -68,3 +68,4 @@ gradle*
 app/bin/
 app/.project
 Dockerfile_base
+*.pem
