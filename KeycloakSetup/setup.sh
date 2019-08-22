@@ -1,4 +1,4 @@
-#!/bin/sh
+#!  /bin/sh
 while getopts ":a:" opt; do
   case $opt in
     a) BASE_URL="$OPTARG"
@@ -8,6 +8,7 @@ while getopts ":a:" opt; do
     ;;
   esac
 done
+echo "using $BASE_URL "
 COMPONENT_URL="$BASE_URL/v1/routes"
 attempts=0
 until $(curl --output /dev/null --silent $COMPONENT_URL); do

@@ -9,10 +9,13 @@ spec:
   template:
     spec:
       containers:
-        - image: durgen/kcc:1.0.1
+        - image: durgen/kcc:1.0.3
           name: kcc
           imagePullPolicy: Always
+          command:
+            - "sh"
           args:
+            - "./setup.sh"
             - "-a"
-            - "http://keycloak.benchmark.svc.cluster.local:8443"
+            - "http://keycloak.benchmark.svc.cluster.local:4000"
       restartPolicy: OnFailure
