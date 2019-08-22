@@ -1,0 +1,18 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: benchmark
+  annotaions:
+  name: kcc
+spec:
+  template:
+    spec:
+      containers:
+        - image: durgen/kcc:1.0.1
+          name: kcc
+          imagePullPolicy: Always
+          args:
+            - "-a"
+            - "http://keycloak.benchmark.svc.cluster.local:8443"
+      restartPolicy: OnFailure

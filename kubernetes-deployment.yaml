@@ -1,18 +1,15 @@
 ---
-
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ditas
+  name: benchmark
   labels:
-    name: ditas
-
+    name: benchmark
 ---
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: ditas
+  namespace: benchmark
   creationTimestamp: null
   labels:
     io.kompose.service: keycloak-claim0
@@ -21,18 +18,16 @@ metadata:
     volume.beta.kubernetes.io/storage-class: gluster-dyn
 spec:
   accessModes:
-  - ReadWriteMany
+    - ReadWriteMany
   resources:
     requests:
       storage: 1Gi
 status: {}
-
 ---
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: ditas
+  namespace: benchmark
   labels:
     io.kompose.service: rm-claim0
   name: vdc-volume
@@ -40,83 +35,94 @@ metadata:
     volume.beta.kubernetes.io/storage-class: gluster-dyn
 spec:
   accessModes:
-  - ReadWriteMany
+    - ReadWriteMany
   resources:
     requests:
       storage: 1Gi
 status: {}
-
 ---
-
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: vdc-ingress
-  namespace: ditas
+  namespace: benchmark
   annotations:
     kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: traefik
     traefik.frontend.rule.type: PathPrefixStrip
     traefik.frontend.entryPoints: http,https
     ingress.kubernetes.io/force-ssl-redirect: "true"
-
 spec:
   rules:
-  - host: vdc.k8s.ise-apps.de
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: vdc-service
-          servicePort: http
-
+    - host: vdc.ditasbench.k8s.ise-apps.de
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: vdc-service
+              servicePort: http
 ---
-
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: keycloak-ingress
-  namespace: ditas
+  namespace: benchmark
   annotations:
     kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: traefik
     traefik.frontend.rule.type: PathPrefixStrip
     traefik.frontend.entryPoints: http,https
     ingress.kubernetes.io/force-ssl-redirect: "true"
-
 spec:
   rules:
-  - host: kc.k8s.ise-apps.de
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: keycloak
-          servicePort: 4444
-
+    - host: keycloak.ditasbench.k8s.ise-apps.de
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: keycloak
+              servicePort: 4444
 ---
-
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: scheduler-ingress
+  namespace: benchmark
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: traefik
+    traefik.frontend.rule.type: PathPrefixStrip
+    traefik.frontend.entryPoints: http,https
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  rules:
+    - host: scheduler.ditasbench.k8s.ise-apps.de
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: scheduler
+              servicePort: 8081
+---
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ditas
+  namespace: benchmark
   name: dal-service
 spec:
   ports:
-  - name: http
-    port: 80
-    targetPort: 8080
+    - name: http
+      port: 80
+      targetPort: 8080
   selector:
     io.kompose.service: dal
 status:
   loadBalancer: {}
-
 ---
-
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  namespace: ditas
+  namespace: benchmark
   annotations:
   labels:
     io.kompose.service: dal
@@ -131,38 +137,34 @@ spec:
         io.kompose.service: dal
     spec:
       containers:
-      - image: ditas/tub-mock-dal
-        name: dal
-        resources: {}
+        - image: ditas/tub-mock-dal
+          name: dal
+          resources: {}
       restartPolicy: Always
 status: {}
-
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ditas
+  namespace: benchmark
   annotations:
   labels:
     io.kompose.service: elasticsearch
   name: elasticsearch
 spec:
   ports:
-  - name: "9200"
-    port: 9200
-    targetPort: 9200
+    - name: "9200"
+      port: 9200
+      targetPort: 9200
   selector:
     io.kompose.service: elasticsearch
 status:
   loadBalancer: {}
-
 ---
-
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  namespace: ditas
+  namespace: benchmark
   annotations:
   labels:
     io.kompose.service: elasticsearch
@@ -177,51 +179,46 @@ spec:
         io.kompose.service: elasticsearch
     spec:
       containers:
-      - args:
-        - -Elogger.level=ERROR
-        env:
-        - name: ES_JAVA_OPTS
-          value: -Xms512m -Xmx512m
-        image: elasticsearch:5.6.15
-        name: elasticsearch
-        ports:
-        - containerPort: 9200
-        resources: {}
+        - args:
+          env:
+            - name: ES_JAVA_OPTS
+              value: -Xms512m -Xmx512m
+          image: durgen/elasticsearch
+          name: elasticsearch
+          ports:
+            - containerPort: 9200
+          resources: {}
       restartPolicy: Always
 status: {}
-
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ditas
+  namespace: benchmark
   annotations:
   labels:
     io.kompose.service: keycloak
   name: keycloak
 spec:
   ports:
-  - name: "4444"
-    port: 4444
-    targetPort: 8080
-  - name: "4040"
-    port: 4040
-    targetPort: 8443
-  - name: "4000"
-    port: 4000
-    targetPort: 8000
+    - name: "4444"
+      port: 4444
+      targetPort: 8080
+    - name: "4040"
+      port: 4040
+      targetPort: 8443
+    - name: "4000"
+      port: 4000
+      targetPort: 8000
   selector:
     io.kompose.service: keycloak
 status:
   loadBalancer: {}
-
 ---
-
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  namespace: ditas
+  namespace: benchmark
   annotations:
   labels:
     io.kompose.service: keycloak
@@ -236,50 +233,50 @@ spec:
         io.kompose.service: keycloak
     spec:
       containers:
-      - env:
-        - name: KEYCLOAK_PASSWORD
-          value: UVhDKCuoQGMAMNAEBWH2gkU0JJR8DnXT
-        image: ditas/keycloak:production
-        name: keycloak
-        ports:
-        - containerPort: 8080
-        - containerPort: 8443
-        - containerPort: 8000
-        resources: {}
-        volumeMounts:
-        - mountPath: /opt/jboss/keycloak/standalone/data
-          name: keycloak-claim0
+        - env:
+            - name: PROXY_ADDRESS_FORWARDING
+              value: 'true'
+            - name: KEYCLOAK_PASSWORD
+              value: UVhDKCuoQGMAMNAEBWH2gkU0JJR8DnXT
+
+          image: ditas/keycloak:production
+          name: keycloak
+          ports:
+            - containerPort: 8080
+            - containerPort: 8443
+            - containerPort: 8000
+          resources: {}
+          volumeMounts:
+            - mountPath: /opt/jboss/keycloak/standalone/data
+              name: keycloak-claim0
       restartPolicy: Always
       volumes:
-      - name: keycloak-claim0
-        persistentVolumeClaim:
-          claimName: keycloak-claim0
-
+        - name: keycloak-claim0
+          persistentVolumeClaim:
+            claimName: keycloak-claim0
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ditas
+  namespace: benchmark
   annotations:
   labels:
   name: vdc-service
 spec:
   ports:
-  - name: http
-    port: 8888
-    targetPort: 80
-  - name: https
-    port: 8884
-    targetPort: 443
+    - name: http
+      port: 8888
+      targetPort: 80
+    - name: https
+      port: 8884
+      targetPort: 443
   selector:
     app: vdc-deployment
-
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  namespace: ditas
+  namespace: benchmark
   annotations:
   labels:
     name: vdc-deployment
@@ -297,49 +294,51 @@ spec:
         app: vdc-deployment
     spec:
       initContainers:
-      - name: log-config
-        image: busybox
-        command: ["sh","-c","echo -n '{\"Port\":8484, \"ElasticSearchURL\":\"http://elasticsearch.ditas.svc.cluster.local:9200\",\"VDCName\":\"tub-mock-vdc\",\"Endpoint\":\"http://localhost:8080\",\"verbose\":true}' | dd of=/etc/ditas/logging.json ; sleep 3 ; cat /etc/ditas/logging.json"]
-        volumeMounts:
-        - mountPath: /etc/ditas
-          name: vdc-volume
-      - name: rm-config
-        image: busybox
-        command: ["sh","-c","echo -n '{\"ElasticSearchURL\":\"http://elasticsearch.ditas.svc.cluster.local:9200\",\"VDCName\":\"tub-mock-vdc\",\"Endpoint\":\"http://localhost:8080\",\"UseSelfSigned\":true,\"ForwardTraffic\":false,\"verbose\":true,\"USEIAM\":false,\"IAMURL\":\"http://kc.k8s.ise-apps.de\",\"JWKSURL\":\"http://kc.k8s.ise-apps.de/auth/realms/vdc_access/protocol/openid-connect/certs\"}' | dd of=/etc/ditas/monitor.json ; sleep 3 ; cat /etc/ditas/monitor.json"]
-        volumeMounts:
-        - mountPath: /etc/ditas
-          name: vdc-volume
-      - name: blueprint-config
-        image: busybox
-        command: ["sh","-c","echo -n '{\"INTERNAL_STRUCTURE\": {\"Overview\": {\"name\": \"tub-mock-example\",\"description\": \"This is a vdc test example for integration testing of tub componentes\",\"tags\": [{\"method_id\": \"ask\",\"tags\": []}]}},\"DATA_MANAGEMENT\": [{\"method_id\": \"ask\",\"attributes\": {\"dataUtility\": [],\"privacy\": []}}],\"ABSTRACT_PROPERTIES\": [{\"method_id\": \"ask\",\"goalTrees\": {}}],\"EXPOSED_API\": {\"openapi\": \"3.0.0\",\"info\": {\"description\": \"\",\"version\": \"1.0.0\",\"title\": \"CAF API\",\"termsOfService\": \"\",\"license\": {\"name\": \"Apache 2.0\",\"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"}},\"tags\": [],\"paths\": {\"/ask\": {\"get\": {\"summary\": \"returns the answer to your question\",\"description\": \"\",\"parameters\": [],\"operationId\": \"ask\",\"responses\": {\"200\": {\"description\": \"Reply to a question nobody ever asked.\",\"content\": {\"application/json\": {\"schema\": {\"$ref\": \"#/components/schemas/Reply\"}}}}}}}},\"components\": {\"schemas\": {\"Reply\": {\"type\": \"object\",\"properties\": {\"msg\": {\"type\": \"string\"}}}}}}}' | dd of=/etc/ditas/blueprint.json ; sleep 3 ; cat /etc/ditas/blueprint.json"]
-        volumeMounts:
-        - mountPath: /etc/ditas
-          name: vdc-volume
+        - name: log-config
+          image: busybox
+          command: ["sh","-c","echo -n '{\"Port\":8484, \"ElasticSearchURL\":\"http://elasticsearch.benchmark.svc.cluster.local:9200\",\"VDCName\":\"tub-mock-vdc\",\"Endpoint\":\"http://localhost:8080\",\"verbose\":true, \"ElasticBasicAuth\":true, \"ElasticUser\":\"ditas\", \"ElasticPassword\": \"es_d1t4s\"}' | dd of=/etc/ditas/logging.json ; sleep 3 ; cat /etc/ditas/logging.json"]
+          volumeMounts:
+            - mountPath: /etc/ditas
+              name: vdc-volume
+        - name: rm-config
+          image: busybox
+          command: ["sh","-c","echo -n '{\"ElasticSearchURL\":\"http://elasticsearch.benchmark.svc.cluster.local:9200\",\"VDCName\":\"tub-mock-vdc\",\"Endpoint\":\"http://localhost:8080\",\"UseSelfSigned\":true,\"ForwardTraffic\":false,\"verbose\":true,\"USEIAM\":false,\"IAMURL\":\"http://kc.k8s.ise-apps.de\",\"JWKSURL\":\"http://keycloak.ditasbench.k8s.ise-apps.de/auth/realms/vdc_access/protocol/openid-connect/certs\", \"BenchmarkForward\":true ,\"BMSURL\": \"http://scheduler.benchmark.svc.cluster.local:8081/v1/sd/collect\", \"ElasticBasicAuth\":true, \"ElasticUser\":\"ditas\", \"ElasticPassword\": \"es_d1t4s\"}' | dd of=/etc/ditas/monitor.json ; sleep 3 ; cat /etc/ditas/monitor.json"]
+          volumeMounts:
+            - mountPath: /etc/ditas
+              name: vdc-volume
+        - name: blueprint-config
+          image: busybox
+          command: ["sh","-c","echo -n '{\"INTERNAL_STRUCTURE\": {\"Overview\": {\"name\": \"tub-mock-example\",\"description\": \"This is a vdc test example for integration testing of tub componentes\",\"tags\": [{\"method_id\": \"ask\",\"tags\": []}]}},\"DATA_MANAGEMENT\": [{\"method_id\": \"ask\",\"attributes\": {\"dataUtility\": [],\"privacy\": []}}],\"ABSTRACT_PROPERTIES\": [{\"method_id\": \"ask\",\"goalTrees\": {}}],\"EXPOSED_API\": {\"openapi\": \"3.0.0\",\"info\": {\"description\": \"\",\"version\": \"1.0.0\",\"title\": \"CAF API\",\"termsOfService\": \"\",\"license\": {\"name\": \"Apache 2.0\",\"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"}},\"tags\": [],\"paths\": {\"/ask\": {\"get\": {\"summary\": \"returns the answer to your question\",\"description\": \"\",\"parameters\": [],\"operationId\": \"ask\",\"responses\": {\"200\": {\"description\": \"Reply to a question nobody ever asked.\",\"content\": {\"application/json\": {\"schema\": {\"$ref\": \"#/components/schemas/Reply\"}}}}}}}},\"components\": {\"schemas\": {\"Reply\": {\"type\": \"object\",\"properties\": {\"msg\": {\"type\": \"string\"}}}}}}}' | dd of=/etc/ditas/blueprint.json ; sleep 3 ; cat /etc/ditas/blueprint.json"]
+          volumeMounts:
+            - mountPath: /etc/ditas
+              name: vdc-volume
       containers:
-      - image: ditas/vdc-request-monitor:production
-        name: rm
-        ports:
-        - containerPort: 80
-        - containerPort: 443
-        volumeMounts:
-        - mountPath: /etc/ditas
-          name: vdc-volume
-      - image: ditas/tub-mock-vdc
-        args:
-        - --log
-        - http://localhost:8484
-        - --dal
-        - dal-service.ditas.svc.cluster.local:80
-        name: vdc
-        ports:
-        - containerPort: 8080
-      - image: ditas/vdc-logging-agent:production
-        name: log
-        volumeMounts:
-        - mountPath: /etc/ditas
-          name: vdc-volume
+        - image: ditas/vdc-request-monitor:production
+          imagePullPolicy: Always
+          name: rm
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          volumeMounts:
+            - mountPath: /etc/ditas
+              name: vdc-volume
+        - image: ditas/tub-mock-vdc:latest
+          args:
+            - --log
+            - http://localhost:8484
+            - --dal
+            - dal-service.benchmark.svc.cluster.local:80
+          name: vdc
+          ports:
+            - containerPort: 8080
+        - image: ditas/vdc-logging-agent:v2.1
+          imagePullPolicy: Always
+          name: log
+          volumeMounts:
+            - mountPath: /etc/ditas
+              name: vdc-volume
       restartPolicy: Always
       volumes:
-      - name: vdc-volume
-        persistentVolumeClaim:
-          claimName: vdc-volume
+        - name: vdc-volume
+          persistentVolumeClaim:
+            claimName: vdc-volume
