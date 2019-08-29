@@ -65,6 +65,27 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  name: app-ingress
+  namespace: benchmark
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: traefik
+    traefik.frontend.rule.type: PathPrefixStrip
+    traefik.frontend.entryPoints: http,https
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  rules:
+    - host: app.ditasbench.k8s.ise-apps.de
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: app
+              servicePort: http
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
   name: keycloak-ingress
   namespace: benchmark
   annotations:
@@ -342,3 +363,44 @@ spec:
         - name: vdc-volume
           persistentVolumeClaim:
             claimName: vdc-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: benchmark
+  annotations:
+  labels:
+  name: app
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+  selector:
+    io.kompose.service: app
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: benchmark
+  annotations:
+  labels:
+    io.kompose.service: app
+  name: app
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: app
+    spec:
+      containers:
+        - image: durgen/example-app
+          name: app
+          ports:
+            - containerPort: 3000
+          resources: {}
+      restartPolicy: Always
+status: {}
