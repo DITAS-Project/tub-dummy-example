@@ -1,8 +1,0 @@
-{
-  "realm": "vdc_access",
-  "auth-server-url": "https://keycloak.ditasbench.k8s.ise-apps.de/auth",
-  "ssl-required": "external",
-  "resource": "vdc_client",
-  "public-client": true,
-  "confidential-port": 0
-}
