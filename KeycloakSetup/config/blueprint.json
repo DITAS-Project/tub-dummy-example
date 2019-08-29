@@ -1,4 +1,5 @@
 {
-    "blueprintid":"vdc_access",
-    "clientid": "vdc_client"
-  }
+  "redirecturi": "app.ditasbench.k8s.ise-apps.de/*",
+  "blueprintid": "vdc_access",
+  "clientid": "vdc_client"
+}

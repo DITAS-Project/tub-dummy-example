@@ -9,7 +9,7 @@ spec:
   template:
     spec:
       containers:
-        - image: durgen/kcc:1.0.3
+        - image: durgen/kcc:1.0.4
           name: kcc
           imagePullPolicy: Always
           command:

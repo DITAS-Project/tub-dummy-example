@@ -4,3 +4,6 @@
 [submodule "dal"]
 	path = dal
 	url = https://github.com/DITAS-Project/tub-mock-dal
+[submodule "client"]
+    path = client
+    url = https://github.com/dergeh/DITAS-Example-App
