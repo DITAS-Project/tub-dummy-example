@@ -7,3 +7,6 @@
 [submodule "client"]
     path = client
     url = https://github.com/dergeh/DITAS-Example-App
+[submodule "DITAS-Example-App"]
+	path = client
+	url = https://github.com/dergeh/DITAS-Example-App

@@ -23,7 +23,7 @@ class KCLogin extends Component {
     render() {
         if (this.state.keycloak) {
             if (this.state.authenticated) {
-                return (<div>{this.state.keycloak.idToken}</div>);
+                return (<div/>);
             } else return (<Button color="primary"
                                    onClick={this.handleLogin}
                                    outline={true}>Keycloak

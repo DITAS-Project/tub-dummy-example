@@ -7,17 +7,21 @@ import KCLogin from './KCLogin';
 
 
 class App extends Component {
+
     constructor(props) {
         super(props);
+
         this.state = {
             items: '',
             form: <div>test</div>,
             customForm: false,
             user: undefined,
             isAuthenticated: false,
-            tokenAuthority: 'http://localhost:4444/auth/realms/vdc_access/protocol/openid-connect/token',
+            tokenAuthority: 'https://keycloak.ditasbench.k8s.ise-apps.de/auth/realms/vdc_access/protocol/openid-connect/token',
             token: '',
-            kcLogin: false
+            kcLogin: false,
+            vdcUrl: 'https://vdc.ditasbench.k8s.ise-apps.de/ask',
+            showForms:true
         }
         this.getInfo = this.getInfo.bind(this);
         this.customLogin = this.customLogin.bind(this);
@@ -25,6 +29,7 @@ class App extends Component {
         this.userUnLoaded = this.userUnLoaded.bind(this);
         this.handleToken = this.handleToken.bind(this);
         this.handleLogin = this.handleLogin.bind(this);
+        this.reset = this.reset.bind(this);
 
     }
 
@@ -54,7 +59,13 @@ class App extends Component {
                     <p className="lead">This is a simple App to demonstrate the
                         Authentication Workflow in the DITAS project</p>
                     <hr className="my-2"/>
-                    <div>{this.state.isAuthenticated ? <div/> :
+                    <div>{!this.state.showForms ?
+                        <div>
+                            <Button color="primary"
+                                    onClick={this.reset}
+                                    outline={true}> reset </Button>
+                        </div>
+                        :
                         <div>< p> You are not authenticated, please click here
                             to
                             authenticate.</p>
@@ -98,17 +109,17 @@ class App extends Component {
 
         const rp = require('request-promise');
 
-        var formBody = [];
-        for (var property in details) {
-            var encodedKey = encodeURIComponent(property);
-            var encodedValue = encodeURIComponent(details[property]);
+        let formBody = [];
+        for (let property in details) {
+            let encodedKey = encodeURIComponent(property);
+            let encodedValue = encodeURIComponent(details[property]);
             formBody.push(encodedKey + "=" + encodedValue);
         }
 
         const body = formBody.join("&");
         const options = {
             method: 'POST',
-            uri: 'http://localhost:4444/auth/realms/vdc_access/protocol/openid-connect/token',
+            uri: this.state.tokenAuthority,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -121,39 +132,51 @@ class App extends Component {
             .then(response => {
                 this.handleToken(JSON.parse(response.body).access_token)
             }).catch(err => {
-                console.log(err);
-                let msg= JSON.parse(err.error).error_description
+            console.log(err);
             this.setState({
-                items: msg
+                items: err.error.message
             })
         })
 
 
     }
 
-    withoutAuth=()=>{
+    withoutAuth = () => {
         const rp = require('request-promise');
-        const options={
-            uri: 'http://localhost:8888/ask',
+        const options = {
+            uri: this.state.vdcUrl,
             resolveWithFullResponse: true
+
 
         }
 
-        rp(options).then(response=> console.log(response)).catch(err => {
+        rp(options).then(response => {
+            console.log(response);
+            this.setState({
+                items: "your application is not secured by IAM",
+                customForm: false,
+                showForms:false
+            })
+
+        }).catch(err => {
             console.log(err);
-            let msg= err.error.message;
+            let msg = err.error.message;
+
             this.setState({
                 items: msg,
-                customForm:false
+                customForm: false,
+                showForms: false
             })
-    })}
+        })
+    }
 
     handleToken(token) {
 
         this.setState({
             token: token,
             isAuthenticated: true,
-            customForm: false
+            customForm: false,
+            showForms: false
         });
 
     }
@@ -171,7 +194,7 @@ class App extends Component {
             const rp = require('request-promise');
             const options = {
 
-                uri: 'http://localhost:8888/ask',
+                uri: this.state.vdcUrl,
                 headers: {
                     'Authorization': 'bearer ' + this.state.token
                 }
@@ -197,6 +220,18 @@ class App extends Component {
         })
 
 
+    }
+
+    reset() {
+        this.setState({
+            customForm: false,
+            user: undefined,
+            isAuthenticated: false,
+            token: '',
+            kcLogin: false,
+            items: '',
+            showForms:true
+        })
     }
 
 
