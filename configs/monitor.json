@@ -1,11 +1,17 @@
 {
     "ElasticSearchURL":"http://elasticsearch:9200",
-    "VDCName":"tub-mock-vdc",
+    "ElasticUser":"admin",
+    "ElasticPassword":"ditasmetrics",
+    "ElasticBasicAuth": true,
+    "VDCName":"vdc-0",
     "Endpoint":"http://vdc:8080",
     "UseSelfSigned":true,
     "ForwardTraffic":false,
+    "ExchangeSecret": "fakeSecret",
+    "TombstoneSecret": "fakeSecret2",
     "verbose":true,
     "USEIAM":true,
+    "Opentracing":false,
     "IAMURL":"http://keycloak:8080",
     "JWKSURL":"http://keycloak:8080/auth/realms/vdc_access/protocol/openid-connect/certs"
 }

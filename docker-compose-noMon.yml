@@ -11,35 +11,12 @@ services:
   vdc:
     image: ditas/tub-mock-vdc
     ports:
-      - "8282:8080"
+      - "8888:8080"
     links:
      - dal:dal
     depends_on:
      - dal
-    command: ["--log","http://localhost:8484","--dal","dal:8080"]
-  
-  rm:
-    image: ditas/vdc-request-monitor:hotfix3
-    ports:
-      - "8888:80"
-      - "8884:443"
-    volumes:
-      - "./configs:/etc/ditas"
-    links:
-      - elasticsearch:elasticsearch
-    pid: service:vdc
-    restart: unless-stopped
-
-  
-  log:
-    image: ditas/vdc-logging-agent:production
-    pid: service:vdc
-    volumes:
-      - "./configs:/etc/ditas"
-    links:
-      - elasticsearch:elasticsearch
-    restart: unless-stopped
-  
+    command: ["--dal","dal:8080"]
   dal:
     image: ditas/tub-mock-dal
   
